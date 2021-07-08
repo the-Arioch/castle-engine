@@ -118,7 +118,7 @@ begin
   RigidBody := TRigidBody.Create(Transform);
 
   Collider := TBoxCollider.Create(RigidBody);
-  Collider.Size := Transform.BoundingBox.Size * 0.9;
+  Collider.Box := Transform.BoundingBox;
 
   Transform.RigidBody := RigidBody;
 end;
@@ -173,17 +173,17 @@ end;
 
 procedure TStateMain.NewTnt(const Y: Single);
 var
-  TntExtent: Single;
   Tnt: TCastleTransform;
+  TntBox: TBox3D;
   LevelBox: TBox3D;
 begin
   Tnt := TntTemplate.TransformLoad(FreeAtStop);
-  TntExtent := Tnt.BoundingBox.MaxSize / 2;
-  LevelBox := SceneLevel.BoundingBox;
+  TntBox := Tnt.BoundingBox;
+  LevelBox := SceneLevel.WorldBoundingBox;
   Tnt.Translation := Vector3(
-    RandomFloatRange(LevelBox.Data[0].X + TntExtent, LevelBox.Data[1].X - TntExtent),
-    Y + TntExtent,
-    RandomFloatRange(LevelBox.Data[0].Z + TntExtent, LevelBox.Data[1].Z - TntExtent));
+    RandomFloatRange(LevelBox.Data[0].X - TntBox.Data[0].X, LevelBox.Data[1].X - TntBox.Data[1].X),
+    Y - TntBox.Data[0].Y + 0.1, // epsilon to be above ground initially
+    RandomFloatRange(LevelBox.Data[0].Z - TntBox.Data[0].Z, LevelBox.Data[1].Z - TntBox.Data[1].Z));
   SetupPhysicsDynamicBox(Tnt);
   Viewport.Items.Add(Tnt);
   Tnts.Add(Tnt);

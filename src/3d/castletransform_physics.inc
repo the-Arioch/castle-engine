@@ -85,8 +85,10 @@
     FKraftShape: TKraftShape;
     FParent: TRigidBody;
     FDensity, FMass, FRestitution, FFriction: Single;
+    FCenter: TVector3;
     procedure InitializeKraft(const APhysics: TKraft;
       const ARigidBody: TKraftRigidBody);
+    procedure SetCenter(const Value: TVector3);
   strict protected
     function CreateKraftShape(const APhysics: TKraft;
       const ARigidBody: TKraftRigidBody): TKraftShape; virtual; abstract;
@@ -126,6 +128,18 @@
 
     property Restitution: Single read FRestitution write FRestitution default DefaultRestitution;
     property Friction: Single read FFriction write FFriction default DefaultFriction;
+
+    { Shape geometry center, zero by default.
+      Use this to shift in 3D the shape geometry.
+
+      TODO: This doesn't work yet, unfortunately.
+      - Testcase: game_3d_sound, with TNT deliberately modified to have non-zero center
+      - The boxes are not in valid positions afterwards.
+        I tried fixing it with
+          TranslationMatrix(-FCollider.FCenter) *
+        at InterpolatedWorldTransform deconstruction, but so far I failed.
+    }
+    property Center: TVector3 read FCenter write SetCenter;
   end;
 
   { Collide as an infinite plane.
@@ -145,8 +159,12 @@
   strict protected
     function CreateKraftShape(const APhysics: TKraft;
       const ARigidBody: TKraftRigidBody): TKraftShape; override;
+    function GetBox: TBox3D;
+    procedure SetBox(const Value: TBox3D);
   public
     Size: TVector3;
+    { Collider geometry as an axis-aligned box, expressing both @link(Size) and @link(Center) at once. }
+    property Box: TBox3D read GetBox write SetBox;
   end;
 
   { Collide as a sphere.
@@ -555,6 +573,12 @@ begin
   FParent.FCollider := Self;
 end;
 
+destructor TCollider.Destroy;
+begin
+  // FreeAndNil(FKraftShape); // do not free here, TKraftShape is owned by TKraftRigidBody
+  inherited;
+end;
+
 procedure TCollider.InitializeKraft(const APhysics: TKraft;
   const ARigidBody: TKraftRigidBody);
 begin
@@ -564,14 +588,19 @@ begin
   FKraftShape.Density := Density;
   FKraftShape.Restitution := Restitution;
   FKraftShape.Friction := Friction;
+  FKraftShape.LocalTransform := Matrix4x4Translate(VectorToKraft(FCenter));
   if not FParent.Exists then
     FKraftShape.Flags := FKraftShape.Flags - [ksfCollision];
 end;
 
-destructor TCollider.Destroy;
+procedure TCollider.SetCenter(const Value: TVector3);
 begin
-  // FreeAndNil(FKraftShape); // do not free here, TKraftShape is owned by TKraftRigidBody
-  inherited;
+  if not TVector3.PerfectlyEquals(FCenter, Value) then
+  begin
+    FCenter := Value;
+    if FKraftShape <> nil then
+      FKraftShape.LocalTransform := Matrix4x4Translate(VectorToKraft(FCenter));
+  end;
 end;
 
 { TPlaneCollider ------------------------------------------------------------- }
@@ -600,6 +629,17 @@ begin
      (Size[2] <= 0) then
     raise EPhysicsError.Create('You must assign positive Size to TBoxCollider');
   Result := TKraftShapeBox.Create(APhysics, ARigidBody, VectorToKraft(Size / 2));
+end;
+
+function TBoxCollider.GetBox: TBox3D;
+begin
+  Result := TBox3D.FromCenterSize(Center, Size);
+end;
+
+procedure TBoxCollider.SetBox(const Value: TBox3D);
+begin
+  Center := Value.Center;
+  Size := Value.Size;
 end;
 
 { TSphereCollider ------------------------------------------------------------ }
@@ -1012,6 +1052,7 @@ procedure TRigidBody.Update(const Transform: TCastleTransform; const SecondsPass
     Shape := FCollider.FKraftShape;
 
     LocalTransform := Transform.Parent.WorldInverseTransform *
+      // TranslationMatrix(-FCollider.FCenter) *
       MatrixFromKraft(Shape.InterpolatedWorldTransform);
 
     MatrixDecompose(LocalTransform, Translation, Rotation, Scale);
