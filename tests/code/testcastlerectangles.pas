@@ -20,8 +20,8 @@ unit TestCastleRectangles;
 interface
 
 uses
-  Classes, SysUtils, FpcUnit, TestUtils, TestRegistry,
-  CastleRectangles, CastleTestCase;
+  Classes, SysUtils, {$ifndef CASTLE_TESTER}FpcUnit, TestUtils, TestRegistry,
+  CastleTestCase{$else}CastleTester{$endif}, CastleRectangles;
 
 type
   TTestRectangles = class(TCastleTestCase)
@@ -240,6 +240,8 @@ begin
 end;
 }
 
+{$ifndef CASTLE_TESTER}
 initialization
   RegisterTest(TTestRectangles);
+{$endif}
 end.
