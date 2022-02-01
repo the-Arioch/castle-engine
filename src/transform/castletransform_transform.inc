@@ -182,6 +182,7 @@
       This is recursively called on all children as well.
       Value must not be @nil. }
     procedure AddToWorld(const Value: TCastleAbstractRootTransform);
+
     { Update FWorld, FWorldReferences.
       This is recursively called on all children as well.
       Value must not be @nil. }
@@ -201,6 +202,8 @@
     { Return non-nil parent, making sure it's valid.
       It's equivalent to @link(Parent), except it makes exception instead of returning @nil. }
     function CheckParent: TCastleTransform;
+
+    procedure SetRotationAngle(const AValue: Single);
   protected
     { Call this when doing anything that allocates GL resources.
       This will make sure GLContextClose will get called. }
@@ -1440,6 +1443,8 @@
       set properties that are vectors in Pascal. }
     property Rotation: TVector4 read FRotation write SetRotation;
 
+    property RotationAngle: Single read FRotation.Data[3] write SetRotationAngle;
+
     { Scale in 3D. Scaling is done around @link(Center)
       and with orientation given by @link(ScaleOrientation).
 
@@ -2409,7 +2414,7 @@ begin
 end;
 
 function TCastleTransform.PointingDeviceMove(const Pick: TRayCollisionNode;
-  const Distance: Single): boolean;
+  const Distance: Single): Boolean;
 begin
   { This event is not automatically passed to all children on List,
     instead the TCastleViewport has special logic which
@@ -3170,6 +3175,15 @@ begin
   FRotation := Value;
   FOnlyTranslation := FOnlyTranslation and (Value[3] = 0);
   ChangedTransform;
+end;
+
+procedure TCastleTransform.SetRotationAngle(const AValue: Single);
+begin
+  if FRotation.W <> AValue then begin;
+     FRotation.W := AValue;
+     FOnlyTranslation := FOnlyTranslation and (AValue = 0);
+     ChangedTransform;
+  end;
 end;
 
 procedure TCastleTransform.SetScale(const Value: TVector3);
