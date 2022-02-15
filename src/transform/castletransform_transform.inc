@@ -1502,7 +1502,7 @@
       set properties that are vectors in Pascal. }
     property Rotation: TVector4 read FRotation write SetRotation;
 
-    property RotationAngle: Single read FRotation.Data[3] write SetRotationAngle;
+    property RotationAngle: Single read FRotation.W write SetRotationAngle;
 
     { Scale in 3D. Scaling is done around @link(Center)
       and with orientation given by @link(ScaleOrientation).
