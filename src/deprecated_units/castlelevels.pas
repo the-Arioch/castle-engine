@@ -699,11 +699,22 @@ destructor TLevel.Destroy;
 begin
   if Info <> nil then
   begin
-    { we check LevelResourcesPrepared, to avoid calling
-      Info.LevelResources.Release when Info.LevelResources.Prepare
-      was not called (which may happen if there was an exception if LoadCore
-      at MainScene.Load(SceneURL). }
-    if (Info.LevelResources <> nil) and LevelResourcesPrepared then
+    if (Info.LevelResources <> nil) and
+       { check LevelResourcesPrepared, to avoid calling
+         Info.LevelResources.Release when Info.LevelResources.Prepare
+         was not called (which may happen if there was an exception if LoadCore
+         at MainScene.Load(SceneURL). }
+       LevelResourcesPrepared and
+       { check "Resources <> nil" is a hack to avoid calling Release
+         on T3DResource when all T3DResource were already freed in CastleResources
+         unit finalization.
+         Testcase: darkest_before_dawn.
+
+         TODO: This is not a general solution -- it would be better to implement in T3DResourceList
+         a way to observe freeing of T3DResource, maybe even make T3DResource a TComponent
+         and then make T3DResourceList as TComponentList. T3DResourceList should automatically
+         remove items freed elsewhere. }
+       (Resources <> nil) then
       Info.LevelResources.Release;
 
     Dec(FLevels.References);
@@ -799,7 +810,7 @@ const
 
     Box := Shape.BoundingBox;
     Position := Box.Center;
-    Position[Items.GravityCoordinate] := Box.Data[0].Data[Items.GravityCoordinate];
+    Position.InternalData[Items.GravityCoordinate] := Box.Data[0].InternalData[Items.GravityCoordinate];
 
     Direction := Info.PlaceholderReferenceDirection;
     Direction := Shape.State.Transformation.Transform.MultDirection(Direction);
@@ -950,10 +961,10 @@ var
     begin
       { Set MoveLimit to Items.MainScene.BoundingBox, and make maximum up larger. }
       NewMoveLimit := Items.MainScene.BoundingBox;
-      NewMoveLimit.Data[1].Data[Items.GravityCoordinate] :=
-      NewMoveLimit.Data[1].Data[Items.GravityCoordinate] +
-        4 * (NewMoveLimit.Data[1].Data[Items.GravityCoordinate] -
-             NewMoveLimit.Data[0].Data[Items.GravityCoordinate]);
+      NewMoveLimit.Data[1].InternalData[Items.GravityCoordinate] :=
+      NewMoveLimit.Data[1].InternalData[Items.GravityCoordinate] +
+        4 * (NewMoveLimit.Data[1].InternalData[Items.GravityCoordinate] -
+             NewMoveLimit.Data[0].InternalData[Items.GravityCoordinate]);
       Items.MoveLimit := NewMoveLimit;
     end;
 
@@ -1528,7 +1539,7 @@ procedure TLevelInfo.LoadFromDocument;
   end;
 
 const
-  DefaultPlaceholderReferenceDirection: TVector3 = (Data: (1, 0, 0));
+  DefaultPlaceholderReferenceDirection: TVector3 = (X: 1; Y: 0; Z: 0);
 var
   LoadingImageURL: string;
   SoundName: string;
