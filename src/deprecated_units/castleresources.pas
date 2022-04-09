@@ -50,7 +50,7 @@ type
         ForcedLoop: Boolean;
         ForcedActualTime: TFloatTime;
 
-        { Prepare scene loading i from given URL.
+        { Prepare scene loading from given URL.
           Loads the scene only if URL is not empty and if it's not already loaded (that is, when Scene = nil).
           Prepares for fast rendering and other processing by TCastleTransform.PrepareResources.
           Calls Progress.Step 2 times, if DoProgress. }
@@ -167,6 +167,12 @@ type
     function GetPlayer: TCastleTransform; virtual; abstract;
     function GetSectors: TSectorList; virtual; abstract;
     function RootTransform: TCastleRootTransform; virtual; abstract;
+    { All creatures are children of this.
+      Allows to easily hide them. }
+    function CreaturesRoot: TCastleTransform; virtual; abstract;
+    { All items are children of this.
+      Allows to easily hide them. }
+    function ItemsRoot: TCastleTransform; virtual; abstract;
     { Parameters to prepare rendering for,
       see @link(TCastleViewport.PrepareParams). }
     function PrepareParams: TPrepareParams; virtual; abstract;
@@ -915,8 +921,13 @@ destructor T3DResource.Destroy;
 begin
   FPrepared := false;
   ReleaseCore;
-  FreeAndNil(FAnimations);
   inherited;
+  { Freeing FAnimations *after* inherited is necessary,
+    because inherited notifies all TResourceFrame about freeing of related T3DResource instance.
+    At the point of that notification, TResourceFrame may assume that referenced FAnimation
+    still exists.
+    Testcase: just run and close fps_game. }
+  FreeAndNil(FAnimations);
 end;
 
 function T3DResource.CreateSceneForPool(const Params: TPrepareParams): TCastleScene;
@@ -1331,7 +1342,7 @@ begin
   Result := FResources;
 end;
 
-initialization // Empty but Delphi need that
+initialization // Empty but Delphi needs this
 
 finalization
   UnitFinalization := true;

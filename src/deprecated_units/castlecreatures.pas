@@ -860,6 +860,7 @@ type
   TCreature = class(TCastleAlive)
   private
     FResource: TCreatureResource;
+    FResourceObserver: TFreeNotificationObserver;
     FResourceFrame: TResourceFrame;
 
     SoundSource: TCastleSoundSource;
@@ -876,6 +877,8 @@ type
     { Calculated @link(Radius) suitable for this creature.
       This is cached result of @link(TCreatureResource.Radius). }
     FRadius: Single;
+
+    procedure ResourceFreeNotification(const Sender: TFreeNotificationObserver);
   protected
     var
       { Set by CreateCreature. }
@@ -906,7 +909,6 @@ type
 
     constructor Create(AOwner: TComponent; const AMaxLife: Single); reintroduce; virtual;
     destructor Destroy; override;
-    function GetExists: boolean; override;
     function GetCollides: boolean; override;
 
     property Resource: TCreatureResource read FResource;
@@ -1075,9 +1077,6 @@ type
 var
   DebugTimeStopForCreatures: boolean = false;
 
-  { Global callback to control creatures existence. }
-  OnCreatureExists: TCreatureExistsEvent;
-
 implementation
 
 {$warnings off} // using deprecated CastleProgress, CastleGameNotifications in deprecated
@@ -1085,9 +1084,6 @@ uses SysUtils, DOM, Math,
   CastleFilesUtils, CastleGLUtils,
   CastleProgress, CastleGameNotifications, CastleUIControls;
 {$warnings on}
-
-var
-  DisableCreatures: Cardinal;
 
 { TCreatureResource -------------------------------------------------------------- }
 
@@ -1166,6 +1162,11 @@ var
   Scale: Single;
   RootTransform: TCastleRootTransform;
 begin
+  if ALevel.CreaturesRoot = nil then
+    raise Exception.CreateFmt('Cannot add creature "%s" to level, as the level is not loaded yet. Execute TLevel.Load first', [
+      Name
+    ]);
+
   RootTransform := ALevel.RootTransform;
 
   { This is only needed if you did not add creature to <resources>.
@@ -1184,19 +1185,22 @@ begin
     to sensibly use the creature }
   Result.Level := ALevel;
   Result.FResource := Self;
+  Result.FResourceObserver.Observed := Self;
   Result.Orientation := Orientation; // must be set before SetView
   Result.SetView(APosition, ADirection, RootTransform.GravityUp, FlexibleUp);
   Result.Life := MaxLife;
   Result.KnockBackSpeed := KnockBackSpeed;
+  {$warnings off} // using deprecated in deprecated
   Result.Gravity := not Flying;
   Result.FallSpeed := FallSpeed;
   Result.GrowSpeed := GrowSpeed;
+  {$warnings on}
   Result.CastShadowVolumes := CastShadowVolumes;
   Result.MiddleHeight := MiddleHeight;
   Scale := RandomFloatRange(ScaleMin, ScaleMax);
   Result.Scale := Vector3(Scale, Scale, Scale);
 
-  RootTransform.Add(Result);
+  ALevel.CreaturesRoot.Add(Result);
 end;
 
 function TCreatureResource.CreateCreature(
@@ -1427,7 +1431,9 @@ begin
     MiddleHeight, so MiddleHeight is always between bounding box bottom and top
     for missiles. See TCastleTransform.MiddleHeight. }
 
+  {$warnings off} // using deprecated in deprecated
   Result.Gravity := false;
+  {$warnings on}
 end;
 
 function TMissileCreatureResource.RadiusCalculate(const GravityUp: TVector3): Single;
@@ -1475,6 +1481,10 @@ begin
   CollidesWithMoving := true;
   MaxLife := AMaxLife;
   FSoundDieEnabled := true;
+
+  FResourceObserver := TFreeNotificationObserver.Create(Self);
+  FResourceObserver.OnFreeNotification := {$ifdef FPC}@{$endif}ResourceFreeNotification;
+
   SoundSource := TCastleSoundSource.Create(Self);
   AddBehavior(SoundSource);
 
@@ -1485,10 +1495,9 @@ begin
   Add(FResourceFrame);
 end;
 
-function TCreature.GetExists: boolean;
+procedure TCreature.ResourceFreeNotification(const Sender: TFreeNotificationObserver);
 begin
-  Result := (inherited GetExists) and (DisableCreatures = 0) and
-    ((not Assigned(OnCreatureExists)) or OnCreatureExists(Self));
+  FResource := nil;
 end;
 
 function TCreature.GetCollides: boolean;
@@ -1614,9 +1623,9 @@ procedure TCreature.Update(const SecondsPassed: Single; var RemoveMe: TRemoveTyp
 
 begin
   inherited;
-  if not GetExists then Exit;
+  if not Exists then Exit;
 
-  { In this case (when GetExists, regardless of DebugTimeStopForCreatures),
+  { In this case (when Exists, regardless of DebugTimeStopForCreatures),
     TCastleAlive.Update changed LifeTime.
     And LifeTime is used to choose animation frame in GetChild.
     So the creature constantly changes, even when it's
@@ -1653,7 +1662,7 @@ end;
 
 function TCreature.Sphere(out ARadius: Single): boolean;
 begin
-  Result := GetExists and (not Dead);
+  Result := Exists and (not Dead);
   ARadius := Radius;
 end;
 
@@ -1873,7 +1882,9 @@ var
   begin
     { calculate DirectionToTarget }
     DirectionToTarget := Target - Middle;
+    {$warnings off} // using deprecated in deprecated
     if Gravity then
+    {$warnings on}
       MakeVectorsOrthoOnTheirPlane(DirectionToTarget, World.GravityUp);
 
     { calculate AngleBetweenDirectionToTarget }
@@ -1923,7 +1934,9 @@ var
         TVector3.CrossProduct(Direction, DirectionToTarget));
 
       { Make sure direction for non-flying creatures is orthogonal to GravityUp. }
+      {$warnings off} // using deprecated in deprecated
       if Gravity then
+      {$warnings on}
         MakeVectorsOrthoOnTheirPlane(NewDirection, World.GravityUp);
       Direction := NewDirection;
     end;
@@ -1935,8 +1948,11 @@ var
   var
     SqrDistanceToTarget: Single;
   begin
+    {$warnings off} // using deprecated in deprecated
     if not Gravity then
-      SqrDistanceToTarget := PointsDistanceSqr(Middle, Target) else
+      SqrDistanceToTarget := PointsDistanceSqr(Middle, Target)
+    {$warnings on}
+    else
       SqrDistanceToTarget := PointsDistance2DSqr(Middle, Target, World.GravityCoordinate);
     Result :=
       { If creature is ideally at the target
@@ -2057,7 +2073,9 @@ var
       where creature can reliably move. Creature that cannot fly cannot
       move in gravity (UpIndex) direction. }
     for I := 0 to 2 do
+      {$warnings off} // using deprecated in deprecated
       if (not Gravity) or (I <> World.GravityCoordinate) then
+      {$warnings on}
         AlternativeTarget.InternalData[I] := AlternativeTarget.InternalData[I] + (Random * Distance * 2 - Distance);
 
     HasAlternativeTarget := true;
@@ -2094,7 +2112,9 @@ var
         SetState(csWalk);
         Result := false;
       end else
+      {$warnings off} // using deprecated in deprecated
       if Gravity and
+      {$warnings on}
          (AngleBetweenDirectionToEnemy < 0.01) and
          BoundingBox.Contains2D(LastSensedEnemy, World.GravityCoordinate) then
       begin
@@ -2140,10 +2160,14 @@ var
         AboveHeight: Single;
       begin
         Result := false;
+        {$warnings off} // using deprecated in deprecated
         if Gravity then
+        {$warnings on}
         begin
           Height(NewMiddle, AboveHeight);
+          {$warnings off} // using deprecated in deprecated
           if AboveHeight > Resource.MaxHeightAcceptableToFall + PreferredHeight then
+          {$warnings on}
             Result := true;
         end;
       end;
@@ -2480,7 +2504,7 @@ var
   E: TCastleTransform;
 begin
   inherited;
-  if (not GetExists) or DebugTimeStopForCreatures then Exit;
+  if (not Exists) or DebugTimeStopForCreatures then Exit;
 
   { eventually turn off InternalMiddleForceBox }
   InternalMiddleForceBox := InternalMiddleForceBox and (LifeTime <= InternalMiddleForceBoxTime);
@@ -2536,7 +2560,9 @@ begin
 
     For non-flying, this is not needed, as then Up should always remain equal
     to initial value, which is GravityUp. }
+  {$warnings off} // using deprecated in deprecated
   if not Gravity then
+  {$warnings on}
     UpPrefer(World.GravityUp);
 
   UpdateDebugTransform;
@@ -2689,17 +2715,30 @@ var
   Player: TCastleTransform;
 
   function MissileMoveAllowed(const OldPos, NewPos: TVector3): boolean;
+  var
+    SavedPlayerExists: Boolean;
+    SavedCreaturesRootExists: Boolean;
   begin
     {$warnings off} // using deprecated in deprecated
-    if (not Resource.HitsPlayer) and (Player <> nil) then Player.Disable;
+    if (not Resource.HitsPlayer) and (Player <> nil) then
+    begin
+      SavedPlayerExists := Player.Exists;
+      Player.Exists := false;
+    end;
     {$warnings on}
-    if not Resource.HitsCreatures then Inc(DisableCreatures);
+    if not Resource.HitsCreatures then
+    begin
+      SavedCreaturesRootExists := Level.CreaturesRoot.Exists;
+      Level.CreaturesRoot.Exists := false;
+    end;
     try
       Result := MoveAllowed(OldPos, NewPos, false);
     finally
-      if not Resource.HitsCreatures then Dec(DisableCreatures);
+      if not Resource.HitsCreatures then
+        Level.CreaturesRoot.Exists := SavedCreaturesRootExists;
       {$warnings off} // using deprecated in deprecated
-      if (not Resource.HitsPlayer) and (Player <> nil) then Player.Enable;
+      if (not Resource.HitsPlayer) and (Player <> nil) then
+        Player.Exists := SavedPlayerExists;
       {$warnings on}
     end;
   end;
@@ -2712,7 +2751,7 @@ var
   C: TCreature;
 begin
   inherited;
-  if (not GetExists) or DebugTimeStopForCreatures then Exit;
+  if (not Exists) or DebugTimeStopForCreatures then Exit;
 
   if Dead then
   begin
@@ -2758,7 +2797,7 @@ begin
         if World[I] is TCreature then
         begin
           C := TCreature(World[I]);
-          if (C <> Self) and C.GetCollides and
+          if (C <> Self) and C.CheckCollides and
             C.BoundingBox.SphereSimpleCollision(Middle, Radius) then
           begin
             HitCreature(C);
@@ -2845,7 +2884,7 @@ procedure TStillCreature.Update(const SecondsPassed: Single; var RemoveMe: TRemo
 
 begin
   inherited;
-  if (not GetExists) or DebugTimeStopForCreatures then Exit;
+  if (not Exists) or DebugTimeStopForCreatures then Exit;
 
   if Dead then
   begin
