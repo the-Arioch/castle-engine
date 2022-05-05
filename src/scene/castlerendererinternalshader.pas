@@ -2066,6 +2066,7 @@ begin
 end;
 
 procedure TShader.Initialize(const APhongShading: boolean);
+//var s1, s2, s3: string;
 begin
   FPhongShading := APhongShading;
   FCodeHash.AddInteger(Ord(PhongShading) * 877);
@@ -2076,6 +2077,10 @@ begin
   Source[stFragment][0] := DefaultFragmentShader[PhongShading];
   Source[stGeometry].Count := 1;
   Source[stGeometry][0] := DefaultGeometryShader;
+//
+//  s1 := Source[stVertex][0];
+//  s2 := Source[stFragment][0];
+//  s3 := Source[stGeometry][0];
 end;
 
 procedure TShader.Plug(const EffectPartType: TShaderType; PlugValue: string;
