@@ -129,6 +129,7 @@ type
     procedure DoEditor;
     procedure DoEditorRebuildIfNeeded;
     procedure DoEditorRun(const WaitForProcessId: TProcessId);
+    procedure DoOutput(const OutputKey: String);
 
     { Information about the project, derived from CastleEngineManifest.xml. }
     { }
@@ -632,8 +633,8 @@ begin
     if OS in AllWindowsOSes then
       Result := pfZip
     else
-    if OS = Darwin then
-      Result := pfMacAppBundle
+    if (OS = Darwin) and Manifest.MacAppBundle then
+      Result := pfMacAppBundleZip
     else
       Result := pfTarGz;
   end else
@@ -838,8 +839,12 @@ begin
       PackageNintendoSwitch(Self);
     pfDirectory, pfZip, pfTarGz, pfDeb:
       PackageDirectory(PackageFormatFinal);
-    pfMacAppBundle:
-      CreateMacAppBundle(Self, OutputPath, false);
+    pfMacAppBundle, pfMacAppBundleZip:
+      begin
+        CreateMacAppBundle(Self, OutputPath, false);
+        if PackageFormatFinal = pfMacAppBundleZip then
+          ZipMacAppBundle(Self, OutputPath, PackageName(OS, CPU, PackageFormatFinal, PackageNameIncludeVersion));
+      end;
     {$ifndef COMPILER_CASE_ANALYSIS}
     else raise EInternalError.Create('Unhandled PackageFormatFinal in DoPackage');
     {$endif}
@@ -923,7 +928,7 @@ procedure TCastleProject.DoRun(const Target: TTarget;
   var
     ExeInBundle: String;
   begin
-    if OS = Darwin then
+    if (OS = Darwin) and Manifest.MacAppBundle then
     begin
       CreateMacAppBundle(Self, TempOutputPath(Path) + 'macos' + PathDelim, true, ExeInBundle);
 
@@ -1024,7 +1029,7 @@ begin
     Result += '-' + Version.DisplayValue;
   Result += '-' + OSToString(OS) + '-' + CPUToString(CPU);
   case PackageFormat of
-    pfZip: Result += '.zip';
+    pfZip, pfMacAppBundleZip: Result += '.zip';
     pfTarGz: Result += '.tar.gz';
     pfDeb: Result += '.deb';
     else ; // leave without extension for pfDirectory
@@ -1563,6 +1568,15 @@ begin
     We should have a system of services for desktop, to manage DLLs, including custom
     DLLs like Effekseer and FMOD. }
   RunCommandNoWait(Path, EditorExe, [ManifestFile]);
+end;
+
+procedure TCastleProject.DoOutput(const OutputKey: String);
+begin
+  case OutputKey of
+    'version': Writeln(Manifest.Version.DisplayValue);
+    'version-code': Writeln(Manifest.Version.Code);
+    else raise Exception.CreateFmt('Unsupported output key: "%s"', [OutputKey]);
+  end;
 end;
 
 procedure TCastleProject.AddMacrosAndroid(const Macros: TStringStringMap);

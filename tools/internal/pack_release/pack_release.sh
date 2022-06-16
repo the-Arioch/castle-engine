@@ -4,6 +4,21 @@ set -euo pipefail
 # ----------------------------------------------------------------------------
 # Pack Castle Game Engine release (source + binaries).
 #
+# Call with:
+#
+# - 2 arguments, OS and CPU (names matching CGE build tool and FPC),
+#   to pack for the given platform. Example:
+#
+#     ./pack_release.sh linux x86_64
+#     ./pack_release.sh win64 x86_64
+#     ./pack_release.sh darwin x86_64
+#     ./pack_release.sh freebsd x86_64
+#
+# - no arguments, to pack for "default" platforms.
+#   "Default" are desktop target platforms possible thanks to Docker image
+#   https://hub.docker.com/r/kambi/castle-engine-cloud-builds-tools/
+#   -- right now this means Linux and Windows.
+#
 # Uses bash strict mode, see http://redsymbol.net/articles/unofficial-bash-strict-mode/
 # (but without IFS modification, deliberately, we want to split on space).
 #
@@ -148,7 +163,7 @@ add_external_tool ()
 
   if [ "$OS" '=' 'darwin' ]; then
     # on macOS, build app bundle, and move it to output path
-    castle-engine $CASTLE_BUILD_TOOL_OPTIONS package
+    castle-engine $CASTLE_BUILD_TOOL_OPTIONS package --package-format=mac-app-bundle
     mv "${EXE_NAME}".app "${OUTPUT_BIN}"
   else
     castle-engine $CASTLE_BUILD_TOOL_OPTIONS compile
@@ -251,7 +266,7 @@ do_pack_platform ()
   # place it in bin-to-keep subdirectory
   if [ "$OS" '=' 'darwin' ]; then
     cd tools/castle-editor/
-    ../build-tool/castle-engine"${EXE_EXTENSION}" $CASTLE_BUILD_TOOL_OPTIONS package
+    ../build-tool/castle-engine"${EXE_EXTENSION}" $CASTLE_BUILD_TOOL_OPTIONS package --package-format=mac-app-bundle
     cd ../../
     cp -R tools/castle-editor/castle-editor.app \
        "${TEMP_PATH_CGE}"bin-to-keep
