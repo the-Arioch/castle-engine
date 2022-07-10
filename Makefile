@@ -117,12 +117,12 @@ BUILD_TOOL = ./tools/build-tool/castle-engine$(EXE_EXTENSION)
 
 .PHONY: default
 default: tools
-	lazbuild --add-package-link src/vampyre_imaginglib/src/Packages/VampyreImagingPackage.lpk
-	lazbuild --add-package-link src/vampyre_imaginglib/src/Packages/VampyreImagingPackageExt.lpk
-	lazbuild --add-package-link packages/castle_base.lpk
-	lazbuild --add-package-link packages/castle_window.lpk
-	lazbuild --add-package-link packages/castle_components.lpk
-	lazbuild tools/castle-editor/castle_editor.lpi
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) --add-package-link src/vampyre_imaginglib/src/Packages/VampyreImagingPackage.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) --add-package-link src/vampyre_imaginglib/src/Packages/VampyreImagingPackageExt.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) --add-package-link packages/castle_base.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) --add-package-link packages/castle_window.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) --add-package-link packages/castle_components.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) tools/castle-editor/castle_editor.lpi
 # move binaries to bin/
 	$(INSTALL) -d bin/
 	$(INSTALL) tools/texture-font-to-pascal/texture-font-to-pascal$(EXE_EXTENSION) bin/
@@ -173,7 +173,7 @@ install:
 #	cp -R tools/build-tool/data $(DATADIR)/castle-engine
 	$(INSTALL) -d  $(DATADIR)
 	cd tools/build-tool/data/ && \
-	  $(FIND) . -type f -exec $(INSTALL) --mode 644 -D '{}' $(DATADIR)/castle-engine/'{}' ';'
+	  "$(FIND)" . -type f -exec $(INSTALL) --mode 644 -D '{}' $(DATADIR)/castle-engine/'{}' ';'
 
 .PHONY: uninstall
 uninstall:
@@ -305,7 +305,7 @@ examples:
 #   - compilation is tested by "make tools" already,
 #   - we don't want to clean it, to have it available for "make test-editor-templates" after this
 #   - on Windows, we'd have to make a copy of castle-engine, as you cannot replace own exe.
-	$(FIND) . \
+	"$(FIND)" . \
 	  '(' -path ./examples/network/tcp_connection -prune ')' -o \
 	  '(' -path ./tools/castle-editor/data/project_templates -prune ')' -o \
 	  '(' -path ./tools/build-tool -prune ')' -o \
@@ -329,7 +329,7 @@ examples:
 # - only searches examples/ subdir
 .PHONY: examples-delphi
 examples-delphi:
-	$(FIND) ./examples/ \
+	"$(FIND)" ./examples/ \
 	  '(' -path ./examples/network/tcp_connection -prune ')' -o \
 	  '(' -path ./examples/castlescript/image_make_by_script -prune ')' -o \
 	  '(' -path ./examples/localization -prune ')' -o \
@@ -355,15 +355,15 @@ cleanexamples:
 
 .PHONY: examples-laz
 examples-laz:
-	lazbuild src/vampyre_imaginglib/src/Packages/VampyreImagingPackage.lpk
-	lazbuild src/vampyre_imaginglib/src/Packages/VampyreImagingPackageExt.lpk
-	lazbuild packages/castle_base.lpk
-	lazbuild packages/castle_window.lpk
-	lazbuild packages/castle_components.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) src/vampyre_imaginglib/src/Packages/VampyreImagingPackage.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) src/vampyre_imaginglib/src/Packages/VampyreImagingPackageExt.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) packages/castle_base.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) packages/castle_window.lpk
+	lazbuild $(CASTLE_LAZBUILD_OPTIONS) packages/castle_components.lpk
 	set -e && for PROJECT_LPI in $(EXAMPLES_BASE_NAMES) $(EXAMPLES_LAZARUS_BASE_NAMES); do \
 	  ./tools/internal/lazbuild_retry $${PROJECT_LPI}.lpi; \
 	done
-	$(FIND) . \
+	"$(FIND)" . \
 	  '(' -path ./examples/network/tcp_connection -prune ')' -o \
 	  '(' -path ./src/vampyre_imaginglib -prune ')' -o \
 	  '(' -path ./tools/castle-editor/data/project_templates -prune ')' -o \
@@ -384,7 +384,7 @@ examples-laz:
 .PHONY: clean cleanmore cleanall
 
 clean: cleanexamples
-	$(FIND) . -type f '(' -iname '*.ow'  -or \
+	"$(FIND)" . -type f '(' -iname '*.ow'  -or \
 	                   -iname '*.ppw' -or \
 			   -iname '*.aw' -or \
 	                   -iname '*.o'   -or \
@@ -406,7 +406,9 @@ clean: cleanexamples
 	                   -iname '*.log' ')' \
 	     -print \
 	     | xargs rm -f
-	$(FIND) . -type d '(' -name 'lib' -or \
+# Note: *.app directory is a macOS bundle,
+# we *do not* remove it here anymore as it would break pack_release.
+	"$(FIND)" . -type d '(' -name 'lib' -or \
 	                      -name 'backup' -or \
 	                      -name 'castle-engine-output' -or \
 			      -name '__recovery' ')' \
@@ -427,7 +429,7 @@ clean: cleanexamples
 # fpmake stuff (binary, units/ produced by fpmake compilation, configs)
 	rm -Rf fpmake fpmake.exe units/ *.fpm .fppkg .config
 # lazarus produces lib/ subdirectories during compilation
-	$(FIND) examples/ -type d -name lib -prune -exec rm -Rf '{}' ';'
+	"$(FIND)" examples/ -type d -name lib -prune -exec rm -Rf '{}' ';'
 	rm -Rf src/deprecated_library/ios-output/\
 	       src/deprecated_library/libcastleengine.dylib \
 	       src/deprecated_library/castleengine.dll \
@@ -442,20 +444,20 @@ clean: cleanexamples
 # (will never be compiled).
 #
 # Note: This may cause errors if build tool doesn't exist anymore, ignore them.
-	$(FIND) . \
+	"$(FIND)" . \
 	  '(' -path ./tools/castle-editor/data/project_templates -prune ')' -or \
 	  '(' -path ./tools/build-tool/tests/data -prune ')' -or \
 	  '(' -iname CastleEngineManifest.xml \
 	      -execdir $(BUILD_TOOL) clean ';' ')'
 
 cleanmore: clean
-	$(FIND) . -type f '(' -iname '*~' -or \
+	"$(FIND)" . -type f '(' -iname '*~' -or \
 	                   -iname '*.bak' -or \
 	                   -iname '*.~???' -or \
 	                   -iname '*.pro.user' -or \
 			   -iname '*.blend1' \
 			')' -exec rm -f '{}' ';'
-	$(FIND) . -type d '(' -iname 'backup' \
+	"$(FIND)" . -type d '(' -iname 'backup' \
 			')' -exec rm -Rf '{}' ';' -prune
 	$(MAKE) -C doc/pasdoc/ clean
 	rm -Rf tools/build-tool/data/android/integrated-services/chartboost/app/libs/*.jar \

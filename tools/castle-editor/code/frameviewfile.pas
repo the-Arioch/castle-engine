@@ -36,7 +36,9 @@ type
     FURL, FSuccessMessage, FErrorMessage: String;
     LabelURL, LabelInformation: TCastleLabel;
     PreviewLayer: TCastleUserInterface;
-    Viewport: TCastleViewport;
+    {$warnings off} // using TCastleAutoNavigationViewport that should be internal
+    Viewport: TCastleAutoNavigationViewport;
+    {$warnings on}
     Scene: TCastleScene;
     Image: TCastleImageControl;
     Sound: TCastleSound;
@@ -64,7 +66,7 @@ type
 implementation
 
 uses CastleColors, CastleUtils, CastleSoundBase, CastleVectors, CastleCameras,
-  CastleURIUtils,
+  CastleTransform, CastleURIUtils,
   EditorUtils;
 
 {$R *.lfm}
@@ -179,7 +181,9 @@ begin
   OldInternalCastleDesignInvalidate := InternalCastleDesignInvalidate;
   ClearLoaded;
 
-  Viewport := TCastleViewport.Create(Self);
+  {$warnings off} // using TCastleAutoNavigationViewport that should be internal
+  Viewport := TCastleAutoNavigationViewport.InternalCreateNonDesign(Self);
+  {$warnings on}
   Viewport.FullSize := true;
   Viewport.AutoCamera := true;
   Viewport.AutoNavigation := true;
@@ -203,7 +207,8 @@ begin
     CameraViewpointForWholeScene(Viewport.Items.BoundingBox,
       2, 1, false, true, Pos, Dir, Up, GravityUp);
     Viewport.NavigationType := ntExamine;
-    Viewport.Camera.SetView(Pos, Dir, Up, GravityUp);
+    Viewport.Camera.SetWorldView(Pos, Dir, Up);
+    Viewport.Camera.GravityUp := GravityUp;
   except
     on E: Exception do
     begin

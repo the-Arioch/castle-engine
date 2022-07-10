@@ -21,11 +21,13 @@ unit CastleColors;
 interface
 
 uses Math, Classes,
-  CastleVectors;
+  CastleVectors, CastleClassUtils;
 
 type
   TCastleColor = TVector4;
+  PCastleColor = PVector4;
   TCastleColorRGB = TVector3;
+  PCastleColorRGB = PVector3;
 
   TCastleColorHelper = record helper for TVector4
     { Get first 3 color components, ignore alpha. }
