@@ -148,6 +148,8 @@ type
       FLastSeenMainScene: TCastleScene; // only used by editor
       FBackground: TCastleBackground;
       FBackgroundObserver: TFreeNotificationObserver;
+      FFog: TCastleFog;
+      FFogObserver: TFreeNotificationObserver;
       // reused between frames for speed
       FRenderWithoutScreenEffectsRenderingCamera: TRenderingCamera;
       FMissingCameraRect: TCastleRectangleControl;
@@ -173,6 +175,8 @@ type
     procedure SetPaused(const Value: Boolean);
     procedure SetBackground(const Value: TCastleBackground);
     procedure BackgroundFreeNotification(const Sender: TFreeNotificationObserver);
+    procedure SetFog(const Value: TCastleFog);
+    procedure FogFreeNotification(const Sender: TFreeNotificationObserver);
     procedure SetInternalDesignNavigationType(const Value: TInternalDesignNavigationType);
 
     { Callbacks when MainCamera is notified that MainScene changes camera/navigation }
@@ -251,6 +255,11 @@ type
       (move camera far away), because it would adjust to the camera and lights gizmo bbox
       (see TTestCastleViewport.TestAutoCameraIgnoresGizmos). }
     function ItemsBoundingBox: TBox3D;
+
+    { Bounding box of everything, including design-time gizmos (because you also want to see
+      them accounted for in design-time ortho camera ProjectionNear/Far).
+      Similar to just usign Items.BoundingBox, but handles Items=nil case OK. }
+    function ItemsWithGizmosBoundingBox: TBox3D;
 
     { Set the projection parameters and matrix.
       Used by our Render method.
@@ -376,8 +385,10 @@ type
       DefaultUseGlobalFog = true;
       DefaultShadowVolumes = true;
       DefaultBackgroundColor: TVector4 = (X: 0.1; Y: 0.1; Z: 0.1; W: 1);
-      Default2DProjectionFar = CastleTransform.Default2DProjectionFar;
-      Default2DProjectionNear = CastleTransform.Default2DProjectionNear;
+      {$warnings off} // referencing deprecated in deprecated
+      Default2DProjectionFar = CastleTransform.Default2DProjectionFar deprecated 'this default is not used; ProjectionFar in orthographic projection is now automatically adjusted to what you display';
+      Default2DProjectionNear = CastleTransform.Default2DProjectionNear deprecated 'this default is not used; ProjectionNear in orthographic projection is now automatically adjusted to what you display';
+      {$warnings on}
       Default2DCameraZ = CastleTransform.Default2DCameraZ;
       DefaultPrepareOptions = [prRenderSelf, prRenderClones, prBackground, prBoundingBox, prScreenEffects];
       { @exclude }
@@ -983,6 +994,9 @@ type
       Displayed only when not @link(Transparent). }
     property Background: TCastleBackground read FBackground write SetBackground;
 
+    { Fog to use to display @link(Items). }
+    property Fog: TCastleFog read FFog write SetFog;
+
     { If @true then the background (from @link(Background) or
       @link(TCastleRootTransform.MainScene MainScene)) will be rendered wireframe,
       over the solid background filled with BackgroundColor.
@@ -1041,6 +1055,7 @@ type
       from MainScene to shine on all objects. }
     property UseGlobalFog: boolean
       read FUseGlobalFog write FUseGlobalFog default DefaultUseGlobalFog;
+      {$ifdef FPC} deprecated 'configure fog by assigning to TCastleViewport.Fog component; leave deprecated TCastleViewport.MainScene nil'; {$endif}
 
     { Help user to activate pointing device sensors and pick items.
       Every time you press Input_Interact (by default
@@ -1263,6 +1278,9 @@ begin
 
   FBackgroundObserver := TFreeNotificationObserver.Create(Self);
   FBackgroundObserver.OnFreeNotification := {$ifdef FPC}@{$endif} BackgroundFreeNotification;
+
+  FFogObserver := TFreeNotificationObserver.Create(Self);
+  FFogObserver.OnFreeNotification := {$ifdef FPC}@{$endif} FogFreeNotification;
 
   FCameraObserver := TFreeNotificationObserver.Create(Self);
   FCameraObserver.OnFreeNotification := {$ifdef FPC}@{$endif} CameraFreeNotification;
@@ -1607,6 +1625,14 @@ begin
     WritelnWarning('AutoCamera is deprecated (on TCastleViewport named "%s"). Instead: It is simpler to set camera at design-time explicitly, or use CameraViewpointForWholeScene from code to auto-adjust camera.' + ' If you want to animate the camera, attach TCastleCamera to a bone transformation exposed by Scene.ExposeTransforms', [
       Name
     ]);
+  if UseGlobalFog <> DefaultUseGlobalFog then
+    WritelnWarning('UseGlobalFog is deprecated (on TCastleViewport named "%s"). Instead: Assign TCastleViewport.Fog to use fog, and leave deprecated TCastleViewport.MainScene = nil', [
+      Name
+    ]);
+  if UseGlobalLights <> DefaultUseGlobalLights then
+    WritelnWarning('UseGlobalLights is deprecated (on TCastleViewport named "%s"). Instead: If you need to tweak lighting, then use regular TCastleScene and set CastGlobalLights as needed; leave deprecated TCastleViewport.MainScene = nil', [
+      Name
+    ]);
   {$warnings on}
 end;
 
@@ -1638,6 +1664,21 @@ procedure TCastleViewport.BackgroundFreeNotification(
   const Sender: TFreeNotificationObserver);
 begin
   Background := nil;
+end;
+
+procedure TCastleViewport.SetFog(const Value: TCastleFog);
+begin
+  if FFog <> Value then
+  begin
+    FFog := Value;
+    FFogObserver.Observed := Value;
+  end;
+end;
+
+procedure TCastleViewport.FogFreeNotification(
+  const Sender: TFreeNotificationObserver);
+begin
+  Fog := nil;
 end;
 
 function TCastleViewport.FillsWholeContainer: boolean;
@@ -2045,6 +2086,14 @@ begin
     Result := TBox3D.Empty;
 end;
 
+function TCastleViewport.ItemsWithGizmosBoundingBox: TBox3D;
+begin
+  if Items <> nil then
+    Result := Items.BoundingBox
+  else
+    Result := TBox3D.Empty;
+end;
+
 procedure TCastleViewport.SetAutoCamera(const Value: Boolean);
 begin
   if FAutoCamera <> Value then
@@ -2136,7 +2185,7 @@ begin
     Exit;
   end;
 
-  Result := InternalCamera.InternalProjection({$ifdef FPC}@{$endif} ItemsBoundingBox,
+  Result := InternalCamera.InternalProjection({$ifdef FPC}@{$endif} ItemsWithGizmosBoundingBox,
     ViewportWidth, ViewportHeight,
     InternalCamera = InternalDesignCamera);
 end;
@@ -2287,6 +2336,9 @@ begin
   FPrepareParams.InternalGlobalLights := FRenderParams.FGlobalLights;
 
   { initialize FPrepareParams.InternalGlobalFog }
+  if Fog <> nil then
+    FPrepareParams.InternalGlobalFog := Fog.InternalFogNode
+  else
   {$warnings off} // using deprecated MainScene to keep it working
   if UseGlobalFog and
      (Items.MainScene <> nil) then
@@ -2467,7 +2519,7 @@ begin
   FRenderParams.RenderingCamera := RenderingCamera;
 
   { calculate FRenderParams.Projection*, simplified from just like CalculateProjection does }
-  FRenderParams.ProjectionBox := {$ifdef FPC}@{$endif} ItemsBoundingBox;
+  FRenderParams.ProjectionBox := {$ifdef FPC}@{$endif} ItemsWithGizmosBoundingBox;
   FRenderParams.ProjectionViewportWidth := EffectiveWidthForChildren;
   FRenderParams.ProjectionViewportHeight := EffectiveHeightForChildren;
 
@@ -2487,6 +2539,9 @@ begin
   {$warnings on}
 
   { calculate FRenderParams.GlobalFog }
+  if Fog <> nil then
+    FRenderParams.GlobalFog := Fog.InternalFogNode
+  else
   {$warnings off} // using deprecated MainScene to keep it working
   if UseGlobalFog and
      (Items.MainScene <> nil) then
@@ -3661,7 +3716,7 @@ begin
   Plane := TCastlePlane.Create(Owner);
   Plane.Name := InternalProposeName(TCastlePlane, Owner);
   Plane.Axis := 2;
-  Plane.Size := Vector2(100, 100);
+  Plane.Size := Vector2(200, 200);
   Plane.Material := pmUnlit;
   Items.Add(Plane);
 
@@ -3716,7 +3771,7 @@ begin
     serves as floor to place new 3D stuff }
   Plane := TCastlePlane.Create(Owner);
   Plane.Name := InternalProposeName(TCastlePlane, Owner);
-  Plane.Size := Vector2(5, 5);
+  Plane.Size := Vector2(10, 10);
   Items.Add(Plane);
 
   if InternalDesignManipulation then
@@ -3760,6 +3815,7 @@ begin
      (PropertyName = 'Camera') or
      (PropertyName = 'Navigation') or
      (PropertyName = 'Background') or
+     (PropertyName = 'Fog') or
      (PropertyName = 'BackgroundColorPersistent') then
     Result := [psBasic]
   else
