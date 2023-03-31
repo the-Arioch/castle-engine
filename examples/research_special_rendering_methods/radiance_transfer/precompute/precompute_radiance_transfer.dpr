@@ -1,5 +1,5 @@
 {
-  Copyright 2008-2022 Michalis Kamburelis.
+  Copyright 2008-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -164,7 +164,6 @@ begin
   Scene := TCastleSceneCore.Create(nil);
   try
     Scene.Load(Parameters[1]);
-    Scene.TriangleOctreeProgressTitle := 'Building octree';
     Scene.Spatial := [ssVisibleTriangles];
 
     TimeStart := ProcessTimer;

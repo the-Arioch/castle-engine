@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -28,7 +28,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdClipBoundary: TMFFloat;
-    {  }
+    { Internal wrapper for property @link(ClipBoundary). This wrapper API may change, we advise to access simpler @link(ClipBoundary) instead. }
     public property FdClipBoundary: TMFFloat read FFdClipBoundary;
     {  }
     procedure SetClipBoundary(const Value: array of Single); overload;

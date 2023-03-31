@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -28,7 +28,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdTexture: TMFNode;
-    {  }
+    { Internal wrapper for property @link(Texture). This wrapper API may change, we advise to access simpler @link(Texture) instead. }
     public property FdTexture: TMFNode read FFdTexture;
     {  }
     procedure SetTexture(const Value: array of TAbstractTexture2DNode);

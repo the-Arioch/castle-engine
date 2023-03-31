@@ -52,6 +52,11 @@ if [ -n "$KAMBI_IS_CYGWIN" ]; then
   OUTPUT_PATH="`cygpath --windows \"$OUTPUT_PATH\"`"
 fi
 
+FIND='find'
+if [ -n "$KAMBI_IS_CYGWIN" ]; then
+  FIND='/bin/find' # On Cygwin, make sure to use Cygwin's find, not the one from Windows
+fi
+
 # calculate PASDOC_CACHE (os-native path)
 # I use --cache-dir with pasdoc, as this greatly speeds up generation
 # of these docs.
@@ -106,7 +111,7 @@ if (( $# == 0 )); then
   #   Although these units are not supposed to be used directly,
   #   but they document API of TVector3 and TVector3Double.
 
-  find .  \
+  "${FIND}" .  \
     '(' -type f -iname '*.pas' \
             -not '(' \
               '(' -iwholename '*/base/android/*.pas' ')' -or \
@@ -138,6 +143,7 @@ PASDOC_INCLUDE_DIRS="\
   --include scene/\
   --include scene/load/\
   --include scene/load/spine/\
+  --include scene/load/md3/\
   --include scene/load/collada/\
   --include scene/x3d/\
   --include audio/\
@@ -188,7 +194,6 @@ pasdoc \
   --html-body-begin ../doc/pasdoc/html-parts/body-begin.html \
   --html-body-end ../doc/pasdoc/html-parts/body-end.html \
   --css ../doc/pasdoc/html-parts/cge-pasdoc.css \
-  --description=../doc/pasdoc/x3dnodes_documentation.txt \
   $FORMAT_OPTIONS \
   | \
   grep --ignore-case --invert-match --fixed-strings \

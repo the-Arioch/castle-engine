@@ -1,5 +1,5 @@
 {
-  Copyright 2008-2022 Michalis Kamburelis.
+  Copyright 2008-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -46,14 +46,15 @@
       ProxyGeometry: TAbstractGeometryNode; ProxyState: TX3DGraphTraverseState): Cardinal; override;
     function TrianglesCount(State: TX3DGraphTraverseState;
       ProxyGeometry: TAbstractGeometryNode; ProxyState: TX3DGraphTraverseState): Cardinal; override;
+    function SolidField: TSFBool; override;
   {$I auto_generated_node_helpers/x3dnodes_geoelevationgrid.inc}
   end;
 
-  TGeoLocationNode = class(TAbstractX3DGroupingNode)
+  TGeoLocationNode = class(TAbstractGroupingNode)
   {$I auto_generated_node_helpers/x3dnodes_geolocation.inc}
   end;
 
-  TGeoLODNode = class(TAbstractGroupingNode)
+  TGeoLODNode = class(TAbstractInternalGroupingNode)
   {$I auto_generated_node_helpers/x3dnodes_geolod.inc}
   end;
 
@@ -77,7 +78,7 @@
   {$I auto_generated_node_helpers/x3dnodes_geotouchsensor.inc}
   end;
 
-  TGeoTransformNode = class(TAbstractX3DGroupingNode)
+  TGeoTransformNode = class(TAbstractGroupingNode)
   {$I auto_generated_node_helpers/x3dnodes_geotransform.inc}
   end;
 
@@ -124,6 +125,11 @@ function TGeoElevationGridNode.TrianglesCount(State: TX3DGraphTraverseState;
 begin
   { Rendering of TGeoElevationGridNode not implemented. }
   Result := 0;
+end;
+
+function TGeoElevationGridNode.SolidField: TSFBool;
+begin
+  Result := FdSolid;
 end;
 
 { TGeoViewpointNode ---------------------------------------------------------- }

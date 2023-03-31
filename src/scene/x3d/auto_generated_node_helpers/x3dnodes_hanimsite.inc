@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -26,6 +26,8 @@
   strict private
     function GetCenter: TVector3;
     procedure SetCenter(const Value: TVector3);
+    function GetDescription: String;
+    procedure SetDescription(const Value: String);
     function GetNameField: String;
     procedure SetNameField(const Value: String);
     function GetRotation: TVector4;
@@ -41,37 +43,43 @@
     class function ClassX3DType: string; override;
 
     strict private FFdCenter: TSFVec3f;
-    {  }
+    { Internal wrapper for property @link(Center). This wrapper API may change, we advise to access simpler @link(Center) instead. }
     public property FdCenter: TSFVec3f read FFdCenter;
     {  }
     property Center: TVector3 read GetCenter write SetCenter;
 
-    strict private FFdName: TSFString;
+    strict private FFdDescription: TSFString;
+    { Internal wrapper for property @link(Description). This wrapper API may change, we advise to access simpler @link(Description) instead. }
+    public property FdDescription: TSFString read FFdDescription;
     {  }
+    property Description: String read GetDescription write SetDescription;
+
+    strict private FFdName: TSFString;
+    { Internal wrapper for property @link(NameField). This wrapper API may change, we advise to access simpler @link(NameField) instead. }
     public property FdName: TSFString read FFdName;
     {  }
     property NameField: String read GetNameField write SetNameField;
 
     strict private FFdRotation: TSFRotation;
-    {  }
+    { Internal wrapper for property @link(Rotation). This wrapper API may change, we advise to access simpler @link(Rotation) instead. }
     public property FdRotation: TSFRotation read FFdRotation;
     {  }
     property Rotation: TVector4 read GetRotation write SetRotation;
 
     strict private FFdScale: TSFVec3f;
-    {  }
+    { Internal wrapper for property @link(Scale). This wrapper API may change, we advise to access simpler @link(Scale) instead. }
     public property FdScale: TSFVec3f read FFdScale;
     {  }
     property Scale: TVector3 read GetScale write SetScale;
 
     strict private FFdScaleOrientation: TSFRotation;
-    {  }
+    { Internal wrapper for property @link(ScaleOrientation). This wrapper API may change, we advise to access simpler @link(ScaleOrientation) instead. }
     public property FdScaleOrientation: TSFRotation read FFdScaleOrientation;
     {  }
     property ScaleOrientation: TVector4 read GetScaleOrientation write SetScaleOrientation;
 
     strict private FFdTranslation: TSFVec3f;
-    {  }
+    { Internal wrapper for property @link(Translation). This wrapper API may change, we advise to access simpler @link(Translation) instead. }
     public property FdTranslation: TSFVec3f read FFdTranslation;
     {  }
     property Translation: TVector3 read GetTranslation write SetTranslation;
@@ -90,6 +98,16 @@ end;
 procedure THAnimSiteNode.SetCenter(const Value: TVector3);
 begin
   FdCenter.Send(Value);
+end;
+
+function THAnimSiteNode.GetDescription: String;
+begin
+  Result := FdDescription.Value;
+end;
+
+procedure THAnimSiteNode.SetDescription(const Value: String);
+begin
+  FdDescription.Send(Value);
 end;
 
 function THAnimSiteNode.GetNameField: String;
@@ -154,6 +172,10 @@ begin
   FFdCenter := TSFVec3f.Create(Self, True, 'center', Vector3(0, 0, 0));
    FdCenter.ChangeAlways := chTransform;
   AddField(FFdCenter);
+
+  FFdDescription := TSFString.Create(Self, True, 'description', '');
+   FdDescription.ChangeAlways := chNone;
+  AddField(FFdDescription);
 
   FFdName := TSFString.Create(Self, True, 'name', '');
    FdName.ChangeAlways := chVisibleNonGeometry;

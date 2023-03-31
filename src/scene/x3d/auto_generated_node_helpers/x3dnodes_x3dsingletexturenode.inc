@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -24,6 +24,8 @@
 {$ifdef read_interface}
 
   strict private
+    function GetDescription: String;
+    procedure SetDescription(const Value: String);
 {$ifndef CASTLE_SLIM_NODES}
     function GetCrossOrigin: String;
     procedure SetCrossOrigin(const Value: String);
@@ -34,15 +36,21 @@
     procedure CreateNode; override;
     class function ClassX3DType: string; override;
 
-    strict private FFdEffects: TMFNode;
+    strict private FFdDescription: TSFString;
+    { Internal wrapper for property @link(Description). This wrapper API may change, we advise to access simpler @link(Description) instead. }
+    public property FdDescription: TSFString read FFdDescription;
     {  }
+    property Description: String read GetDescription write SetDescription;
+
+    strict private FFdEffects: TMFNode;
+    { Internal wrapper for property @link(Effects). This wrapper API may change, we advise to access simpler @link(Effects) instead. }
     public property FdEffects: TMFNode read FFdEffects;
     {  }
     procedure SetEffects(const Value: array of TEffectNode);
 
 {$ifndef CASTLE_SLIM_NODES}
     strict private FFdCrossOrigin: TSFString;
-    { X3DOM extension, not implemented in CGE. }
+    { Internal wrapper for property @link(CrossOrigin). This wrapper API may change, we advise to access simpler @link(CrossOrigin) instead. }
     public property FdCrossOrigin: TSFString read FFdCrossOrigin;
 {$endif not CASTLE_SLIM_NODES}
 {$ifndef CASTLE_SLIM_NODES}
@@ -51,7 +59,7 @@
 {$endif not CASTLE_SLIM_NODES}
 
     strict private FFdAlphaChannel: TSFStringEnum;
-    {  }
+    { Internal wrapper for property @link(AlphaChannel). This wrapper API may change, we advise to access simpler @link(AlphaChannel) instead. }
     public property FdAlphaChannel: TSFStringEnum read FFdAlphaChannel;
     {  }
     property AlphaChannel: TAutoAlphaChannel read GetAlphaChannel write SetAlphaChannel;
@@ -61,6 +69,16 @@
 {$ifdef read_implementation}
 
 { TAbstractSingleTextureNode ----------------------------------------------- }
+
+function TAbstractSingleTextureNode.GetDescription: String;
+begin
+  Result := FdDescription.Value;
+end;
+
+procedure TAbstractSingleTextureNode.SetDescription(const Value: String);
+begin
+  FdDescription.Send(Value);
+end;
 
 procedure TAbstractSingleTextureNode.SetEffects(const Value: array of TEffectNode);
 var
@@ -104,6 +122,10 @@ end;
 procedure TAbstractSingleTextureNode.CreateNode;
 begin
   inherited;
+
+  FFdDescription := TSFString.Create(Self, True, 'description', '');
+   FdDescription.ChangeAlways := chNone;
+  AddField(FFdDescription);
 
   FFdEffects := TMFNode.Create(Self, False, 'effects', [TEffectNode]);
    FdEffects.ChangeAlways := chEverything;

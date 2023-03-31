@@ -1,5 +1,5 @@
 {
-  Copyright 2002-2022 Michalis Kamburelis.
+  Copyright 2002-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -722,14 +722,14 @@
       @groupBegin }
     function TryFindNodeByName(FindClass: TX3DNodeClass;
       const FindName: string;
-      OnlyActive: boolean): TX3DNode; deprecated 'use FindNode';
+      OnlyActive: boolean): TX3DNode; deprecated 'use FindNode(NodeClass: TX3DNodeClass, FindName: String, Options: TFindNodeOptions = [])';
     function FindNodeByName(FindClass: TX3DNodeClass;
       const FindName: string;
-      OnlyActive: boolean): TX3DNode; deprecated 'use FindNode';
+      OnlyActive: boolean): TX3DNode; deprecated 'use FindNode(NodeClass: TX3DNodeClass, FindName: String, Options: TFindNodeOptions = [])';
     function TryFindNode(FindClass: TX3DNodeClass;
-      OnlyActive: boolean): TX3DNode; deprecated 'use FindNode';
+      OnlyActive: boolean): TX3DNode; deprecated 'use FindNode(NodeClass: TX3DNodeClass, FindName: String, Options: TFindNodeOptions = [])';
     function FindNode(FindClass: TX3DNodeClass;
-      OnlyActive: boolean): TX3DNode; overload; deprecated 'use FindNode';
+      OnlyActive: boolean): TX3DNode; overload; deprecated 'use FindNode(NodeClass: TX3DNodeClass, FindName: String, Options: TFindNodeOptions = [])';
     { @groupEnd }
 
     { Find a node by name and class, in this node and children (recursively).
@@ -741,10 +741,10 @@
         Unless fnNilOnMissing in Options, then it returns @nil on missing node,
         and EX3DNotFound is never raised.)
     }
-    function FindNode(const NodeClass: TX3DNodeClass; const FindName: string;
+    function FindNode(const NodeClass: TX3DNodeClass; const FindName: String;
       const Options: TFindNodeOptions = []): TX3DNode; overload;
 
-    function FindNode(const FindName: string): TX3DNode; overload; deprecated 'use FindNode(NodeClass, FindName)';
+    function FindNode(const FindName: string): TX3DNode; overload; deprecated 'use FindNode(NodeClass: TX3DNodeClass, FindName: String, Options: TFindNodeOptions = [])';
 
     {$ifdef GENERIC_METHODS}
 
@@ -905,6 +905,8 @@
     function RoutesCount: Integer;
     procedure AddRoute(const Value: TX3DRoute); overload;
     procedure AddRoute(const Source, Destination: TX3DFieldOrEvent); overload;
+    procedure RemoveRoute(const Value: TX3DRoute); overload;
+    procedure RemoveRoute(const Index: Integer); overload;
 
     property ImportsList [const Index: Integer]: TX3DImport read GetImports;
     function ImportsCount: Integer;
@@ -2964,6 +2966,7 @@ begin
   end;
 end;
 
+{$warnings off} // using deprecated to keep supporting VRML 1
 class function TX3DNode.VRML1StateNode(out StateNode: TVRML1StateNode): boolean;
 var
   SN: TVRML1StateNode;
@@ -2979,6 +2982,7 @@ begin
     end;
   Result := false;
 end;
+{$warnings on}
 
 class function TX3DNode.ForVRMLVersion(const Version: TX3DVersion): boolean;
 begin
@@ -3454,6 +3458,21 @@ begin
   Route.SetSourceDirectly(Source);
   Route.SetDestinationDirectly(Destination);
   AddRoute(Route);
+end;
+
+procedure TX3DNode.RemoveRoute(const Value: TX3DRoute);
+begin
+  Assert(FRoutes <> nil);
+
+  RemoveRoute(FRoutes.IndexOf(Value));
+end;
+
+procedure TX3DNode.RemoveRoute(const Index: Integer);
+begin
+  Assert(FRoutes <> nil);
+  Assert(Between(Index, 0, FRoutes.Count - 1));
+
+  FRoutes.Delete(Index);
 end;
 
 function TX3DNode.GetImports(const Index: Integer): TX3DImport;

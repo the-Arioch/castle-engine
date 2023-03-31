@@ -1,5 +1,5 @@
 {
-  Copyright 2002-2022 Michalis Kamburelis.
+  Copyright 2002-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -17,7 +17,6 @@
 
 {$ifdef read_interface}
   { }
-  TKambiOctreePropertiesNode = class;
   TAbstractShaderNode = class;
   TAbstractOneSidedMaterialNode = class;
   TAbstractSingleTextureNode = class;
@@ -188,14 +187,6 @@
   public
     {$I auto_generated_node_helpers/x3dnodes_fillproperties.inc}
   end;
-
-  { Supported line types (patterns), for @link(TLinePropertiesNode.LineType). }
-  TLineType = (
-    ltSolid,
-    ltDashed,
-    ltDotted,
-    ltDashedDotted,
-    ltDashDotDot);
 
   { Additional visible properties to be applied to all line geometry. }
   TLinePropertiesNode = class(TAbstractAppearanceChildNode)
@@ -455,9 +446,6 @@ begin
   FdBboxSize.ChangeAlways := chBBox;
   FdAppearance.ChangeAlways := chEverything;
   FdGeometry.ChangeAlways := chEverything;
-  {$ifndef CASTLE_SLIM_NODES}
-  FdOctreeTriangles.ChangeAlways := chEverything;
-  {$endif}
 end;
 
 procedure TAbstractShapeNode.SetAppearanceBefore(const Value: TAppearanceNode);
@@ -648,8 +636,7 @@ end;
 
 procedure TAppearanceNode.SetMaterialBefore(const Value: TAbstractMaterialNode);
 begin
-  if (Scene <> nil) and
-     (FdMaterial.Value <> Value) then
+  if Scene <> nil then
     Scene.InternalMoveShapeAssociations(FdMaterial.Value, Value, InternalSceneShape);
 end;
 
@@ -821,6 +808,7 @@ var
 begin
   inherited;
 
+  {$warnings off} // using deprecated material props to keep them working
   MP := InternalMaterialProperty;
 
   if (MP <> nil) and (MP.NormalMap <> '') and (FdNormalMap.Value = nil) then
@@ -835,6 +823,7 @@ begin
      (MP.AlphaChannel <> '') and
      (Texture is TAbstractSingleTextureNode) { checks also Texture <> nil } then
     TAbstractSingleTextureNode(Texture).FdAlphaChannel.Value := MP.AlphaChannel;
+  {$warnings on}
 end;
 
 function TLinePropertiesNode.GetLineType: TLineType;
@@ -1095,7 +1084,7 @@ procedure TShapeNode.GenerateTangents;
     const TexCoords: TVector2List;
     const Tangents: TVector3List);
   var
-    TriangleIndexes: TLongIntList;
+    TriangleIndexes: TInt32List;
     Tangent: TVector3;
     I, Index0, Index1, Index2: Integer;
     TriangleCoord: TTriangle3;

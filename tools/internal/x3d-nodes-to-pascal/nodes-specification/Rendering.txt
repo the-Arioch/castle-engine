@@ -1,14 +1,11 @@
 X3DGeometryNode : X3DNode {
-  auto-generate-more: true
   default-container-field: geometry
 }
 
 X3DGeometricPropertyNode : X3DNode {
-  auto-generate-more: true
 }
 
 X3DColorNode : X3DGeometricPropertyNode {
-  auto-generate-more: true
   default-container-field: color
   SFString   []   mode   "REPLACE"
     range: ["REPLACE","MODULATE"]
@@ -16,8 +13,6 @@ X3DColorNode : X3DGeometricPropertyNode {
 }
 
 X3DComposedGeometryNode : X3DGeometryNode {
-  auto-generate-more: true
-
   MFNode [in,out] attrib          []
     range: X3DVertexAttributeNode
     not-slim
@@ -38,9 +33,11 @@ X3DComposedGeometryNode : X3DGeometryNode {
   SFNode [in,out] tangent         NULL
     range: Tangent
     change: chGeometry
+    doc: Tangent vectors describe the tangent coordinate-space, used by the bump mapping algorithm. If specified, the ordering of tangents should be the same as normals, i.e. they should follow the NormalPerVertex and such properties.
   SFNode [in,out] texCoord        NULL
     range: X3DTextureCoordinateNode
     change: chGeometry
+    setter-before: SetTexCoordBefore
   SFBool []       ccw             TRUE
     change: chGeometry
   SFBool []       colorPerVertex  TRUE
@@ -57,18 +54,14 @@ X3DComposedGeometryNode : X3DGeometryNode {
 }
 
 X3DCoordinateNode : X3DGeometricPropertyNode {
-  auto-generate-more: true
   default-container-field: coord
 }
 
 X3DNormalNode : X3DGeometricPropertyNode {
-  auto-generate-more: true
   default-container-field: normal
 }
 
 ClipPlane : X3DChildNode {
-  auto-generate-more: true
-
   SFBool  [in,out] enabled  TRUE
     change: chClipPlane
   SFVec4f [in,out] plane    0 1 0 0
@@ -77,32 +70,24 @@ ClipPlane : X3DChildNode {
 }
 
 Color : X3DColorNode {
-  auto-generate-more: true
-
   MFColor [in,out] color    []
     range: [0,1]
     change: chColorNode
 }
 
 ColorRGBA : X3DColorNode {
-  auto-generate-more: true
-
   MFColorRGBA [in,out] color    []
     range: [0,1]
     change: chColorNode
 }
 
 Coordinate : X3DCoordinateNode {
-  auto-generate-more: true
-
   MFVec3f [in,out] point    []
     range: (-Inf,Inf)
     change: chCoordinate
 }
 
 IndexedLineSet : X3DGeometryNode {
-  auto-generate-more: true
-
   MFInt32 [in]     set_colorIndex
   MFInt32 [in]     set_coordIndex
   MFNode  [in,out] attrib         []
@@ -127,11 +112,14 @@ IndexedLineSet : X3DGeometryNode {
   MFInt32 []       coordIndex     []
     range:  [0,Inf) or -1
     change: chGeometry
+  SFString []      mode   "STRIP"
+    range: ["STRIP","PAIR","LOOP"]
+    enumerated-type: TLineMode LineModeNames lmStrip
+    doc: How to interpret the vertexes: as a set of strips, loops, or just pairs of vertexes. See possible @link(TLineMode) values for details.
+    change: chGeometry
 }
 
 IndexedTriangleFanSet : X3DComposedGeometryNode {
-  auto-generate-more: true
-
   MFInt32 [in]     set_index       []
     range: [0,Inf) or -1
   MFInt32 []       index           []
@@ -140,8 +128,6 @@ IndexedTriangleFanSet : X3DComposedGeometryNode {
 }
 
 IndexedTriangleSet : X3DComposedGeometryNode {
-  auto-generate-more: true
-
   MFInt32 [in]     set_index       []
     range: [0,Inf)
   MFInt32 []       index           []
@@ -150,8 +136,6 @@ IndexedTriangleSet : X3DComposedGeometryNode {
 }
 
 IndexedTriangleStripSet : X3DComposedGeometryNode {
-  auto-generate-more: true
-
   MFInt32 [in]     set_index       []
     range: [0,Inf) or -1
   MFInt32 []       index           []
@@ -160,8 +144,6 @@ IndexedTriangleStripSet : X3DComposedGeometryNode {
 }
 
 LineSet : X3DGeometryNode {
-  auto-generate-more: true
-
   MFNode  [in,out] attrib         []
     range: X3DVertexAttributeNode
     not-slim
@@ -179,18 +161,20 @@ LineSet : X3DGeometryNode {
   MFInt32 [in,out] vertexCount    []
     range: [2,Inf)
     change: chGeometry
+  SFString []      mode   "STRIP"
+    range: ["STRIP","LOOP","PAIR"]
+    enumerated-type: TLineMode LineModeNames lmStrip
+    doc: How to interpret the vertexes: as a set of strips, loops, or just pairs of vertexes. See possible @link(TLineMode) values for details.
+    change: chGeometry
 }
 
 Normal : X3DNormalNode {
-  auto-generate-more: true
-
   MFVec3f [in,out] vector   []
     range: [-1,1]
     change: chNormal
 }
 
 Tangent : X3DGeometricPropertyNode {
-  auto-generate-more: true
   default-container-field: tangent
   MFVec3f [in,out] vector   []
     range: [-1,1]
@@ -198,8 +182,6 @@ Tangent : X3DGeometricPropertyNode {
 }
 
 PointSet : X3DGeometryNode {
-  auto-generate-more: true
-
   MFNode [in,out] attrib   []
     range: X3DVertexAttributeNode
     not-slim
@@ -217,20 +199,15 @@ PointSet : X3DGeometryNode {
 }
 
 TriangleFanSet : X3DComposedGeometryNode {
-  auto-generate-more: true
-
   MFInt32 [in,out] fanCount        []
     range: [3,Inf)
     change: chGeometry
 }
 
 TriangleSet : X3DComposedGeometryNode {
-  auto-generate-more: true
 }
 
 TriangleStripSet : X3DComposedGeometryNode {
-  auto-generate-more: true
-
   MFInt32 [in,out] stripCount      []
     range: [3,Inf)
     change: chGeometry

@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -31,11 +31,11 @@
     class function ClassX3DType: string; override;
 
     strict private FFdCollidables: TMFNode;
-    {  }
+    { Internal wrapper for property @link(Collidables). This wrapper API may change, we advise to access simpler @link(Collidables) instead. }
     public property FdCollidables: TMFNode read FFdCollidables;
 
     strict private FFdUseGeometry: TSFBool;
-    {  }
+    { Internal wrapper for property @link(UseGeometry). This wrapper API may change, we advise to access simpler @link(UseGeometry) instead. }
     public property FdUseGeometry: TSFBool read FFdUseGeometry;
     {  }
     property UseGeometry: Boolean read GetUseGeometry write SetUseGeometry;

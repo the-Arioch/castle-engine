@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -31,7 +31,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdOffset: TSFRotation;
-    {  }
+    { Internal wrapper for property @link(Offset). This wrapper API may change, we advise to access simpler @link(Offset) instead. }
     public property FdOffset: TSFRotation read FFdOffset;
     {  }
     property Offset: TVector4 read GetOffset write SetOffset;

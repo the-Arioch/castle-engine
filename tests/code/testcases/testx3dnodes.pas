@@ -1,6 +1,6 @@
 // -*- compile-command: "./test_single_testcase.sh TTestX3DNodes" -*-
 {
-  Copyright 2004-2022 Michalis Kamburelis.
+  Copyright 2004-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -103,6 +103,7 @@ type
     procedure TestGenericFind;
     {$endif}
     procedure TestProtoExpansion;
+    procedure TestSolidField;
   end;
 
 implementation
@@ -149,8 +150,8 @@ begin
 
   InstantiableNodes.Add(TX3DRootNode);
   InstantiableNodes.Add(TX3DNode);
+  InstantiableNodes.Add(TAbstractInternalGroupingNode);
   InstantiableNodes.Add(TAbstractGroupingNode);
-  InstantiableNodes.Add(TAbstractX3DGroupingNode);
 end;
 
 procedure TTestX3DNodes.TearDown;
@@ -388,10 +389,10 @@ begin
       begin
         CurrentName := N.Fields[J].X3DName;
         for K := 0 to N.FieldsCount - 1 do
-          AssertTrue(CurrentName + ' must be unique field name',
+          AssertTrue(N.X3DType + '.' + CurrentName + ' must be unique field name',
             (K = J) or (not N.Fields[K].IsName(CurrentName)));
         for K := 0 to N.EventsCount - 1 do
-          AssertTrue(CurrentName + ' must be unique event name',
+          AssertTrue(N.X3DType + '.' + CurrentName + ' must be unique event name',
             not N.Events[K].IsName(CurrentName));
       end;
 
@@ -399,10 +400,10 @@ begin
       begin
         CurrentName := N.Events[J].X3DName;
         for K := 0 to N.FieldsCount - 1 do
-          AssertTrue(CurrentName + ' must be unique field name',
+          AssertTrue(N.X3DType + '.' + CurrentName + ' must be unique field name',
             not N.Fields[K].IsName(CurrentName));
         for K := 0 to N.EventsCount - 1 do
-          AssertTrue(CurrentName + ' must be unique event name',
+          AssertTrue(N.X3DType + '.' + CurrentName + ' must be unique event name',
             (K = J) or (not N.Events[K].IsName(CurrentName)));
       end;
     finally FreeAndNil(N) end;
@@ -439,7 +440,7 @@ begin
 
     { Inventor spec nodes }
     TIndexedTriangleMeshNode_1,
-    TRotationXYZNode,
+    TRotationXYZNode_1,
 
     { VRML 1.0 spec nodes }
     TAsciiTextNode_1, TConeNode_1, TCubeNode_1, TCylinderNode_1,
@@ -470,7 +471,6 @@ begin
     TWWWInlineNode_1,
 
     { Kambi non-standard nodes }
-    TKambiHeadLightNode,
     //TText3DNode,
     //TBlendModeNode,
     //TKambiAppearanceNode,
@@ -488,10 +488,6 @@ begin
     //TConeNode,
     //TContour2DNode,
     //TCoordinateNode,
-    { VRML 2.0 spec section "4.6.5 Grouping and children nodes"
-      doesn't say is CoordinateDeformer allowed or not as children node.
-      To be fixed when I'll implement CoordinateDeformer handling. }
-    TCoordinateDeformerNode,
     TCoordinateInterpolatorNode,
     //TCylinderNode,
     TCylinderSensorNode,
@@ -533,11 +529,6 @@ begin
     TNormalInterpolatorNode,
     //TNurbsCurveNode,
     //TNurbsCurve2DNode,
-    { VRML 2.0 spec section "4.6.5 Grouping and children nodes"
-      doesn't say is NurbsGroup allowed or not as children node.
-      To be fixed when I'll implement NurbsGroup handling. }
-    TNurbsGroupNode,
-    TNurbsPositionInterpolatorNode_2,
     //TNurbsSurfaceNode,
     //TNurbsTextureSurfaceNode,
     TOrientationInterpolatorNode,
@@ -584,7 +575,6 @@ begin
   AllowedGeometryNodes.AssignArray([
     TBoxNode,
     TConeNode,
-    TContour2DNode_2,
     TCylinderNode,
     TElevationGridNode,
     TExtrusionNode,
@@ -592,12 +582,10 @@ begin
     TIndexedFaceSetNode,
     TIndexedLineSetNode,
     TNurbsCurveNode,
-    TNurbsSurfaceNode,
     TPointSetNode,
     TSphereNode,
     TTextNode,
-    TText3DNode,
-    TTrimmedSurfaceNode
+    TText3DNode
   ]);
 
   try
@@ -922,12 +910,7 @@ begin
   begin
     N := InstantiableNodes[I].Create;
     try
-      if (N is TAbstractGeometryNode) and
-         { TContour2DNode_2 is an exception, it has containerField=trimmingContour.
-           This isn't really mandated by any specification,
-           as VRML 97 spec doesn't use XML encoding,
-           so it doesn't specify containerField. }
-         (not (N is TContour2DNode_2)) then
+      if N is TAbstractGeometryNode then
       try
         AssertTrue(N.DefaultContainerField = 'geometry');
       except
@@ -2403,6 +2386,25 @@ begin
     CheckProtoInstance(0, 'palette1.png');
     CheckProtoInstance(1, 'palette2.png');
   finally FreeAndNil(RootNode) end;
+end;
+
+procedure TTestX3DNodes.TestSolidField;
+var
+  I, J: Integer;
+  N: TAbstractGeometryNode;
+begin
+  for I := 0 to InstantiableNodes.Count - 1 do
+  begin
+    if InstantiableNodes[I].InheritsFrom(TAbstractGeometryNode) then
+    begin
+      N := InstantiableNodes[I].Create as TAbstractGeometryNode;
+      try
+        for J := 0 to N.FieldsCount - 1 do
+          if N.Fields[J].X3DName = 'solid' then
+            AssertTrue('SolidField overridden correctly for ' + N.X3DType, N.SolidField = N.Fields[J]);
+      finally FreeAndNil(N) end;
+    end;
+  end;
 end;
 
 initialization

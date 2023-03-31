@@ -70,9 +70,10 @@ interface
 
 uses Classes, Generics.Collections,
   CastleKeysMouse, CastleUtils, CastleClassUtils,
-  CastleXMLConfig, CastleUIControls;
+  CastleXMLConfig {$ifndef CASTLE_STRICT_CLI} , CastleUIControls {$endif};
 
 type
+  { Type of input, for TInputShortcut.Group. }
   TInputGroup = (igLocal, igBasic, igItems, igOther);
   TInputGroupNotLocal = igBasic..High(TInputGroup);
 
@@ -222,9 +223,11 @@ type
     function IsPressed(const Pressed: TKeysPressed;
       const MousePressed: TCastleMouseButtons): boolean; overload;
 
+    {$ifndef CASTLE_STRICT_CLI}
     { Looking at Container's currently pressed keys and mouse buttons,
       decide whether this input is currently pressed. }
     function IsPressed(const Container: TCastleContainer): boolean; overload;
+    {$endif}
 
     { Check does given Key or AKeyString correspond to this input shortcut.
       If Key = keyNone and AString = '', result is always @false. }
@@ -672,10 +675,12 @@ begin
     );
 end;
 
+{$ifndef CASTLE_STRICT_CLI}
 function TInputShortcut.IsPressed(const Container: TCastleContainer): boolean;
 begin
   Result := IsPressed(Container.Pressed, Container.MousePressed);
 end;
+{$endif}
 
 function TInputShortcut.IsKey(const Key: TKey; AKeyString: String): boolean;
 begin
@@ -1023,7 +1028,7 @@ begin
     I.SaveToConfig(Config, ConfigPath);
 end;
 
-function SortInputShortcut({$ifdef FPC}constref{$else}const{$endif} A, B: TInputShortcut): Integer;
+function SortInputShortcut({$ifdef GENERICS_CONSTREF}constref{$else}const{$endif} A, B: TInputShortcut): Integer;
 begin
   Result := A.GroupOrder - B.GroupOrder;
   { since TFPSList.Sort is not stable, we use Index to keep order predictable

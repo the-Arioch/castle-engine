@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -31,7 +31,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdMatrix: TSFMatrix4f;
-    {  }
+    { Internal wrapper for property @link(Matrix). This wrapper API may change, we advise to access simpler @link(Matrix) instead. }
     public property FdMatrix: TSFMatrix4f read FFdMatrix;
     {  }
     property Matrix: TMatrix4 read GetMatrix write SetMatrix;

@@ -1,6 +1,6 @@
 {%MainUnit castlescene.pas}
 {
-  Copyright 2021-2022 Michalis Kamburelis.
+  Copyright 2021-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -155,6 +155,13 @@ end;
 
 destructor TCastleText.Destroy;
 begin
+  { Since our instance will become invalid soon,
+    FCustomFont should not notify us anymore.
+    Testcase: examples/localization/gettext/ }
+  if FCustomFont <> nil then
+    FCustomFont.RemoveFontSizeChangeNotification(
+      {$ifdef FPC}@{$endif}CustomFontSizeChanged);
+
   FreeAndNil(FText);
   inherited;
 end;
@@ -186,7 +193,7 @@ end;
 
 procedure TCastleText.TextChange(Sender: TObject);
 begin
-  TextNode.SetString(FText as TCastleStringList);
+  TextNode.SetText(FText as TCastleStringList);
 end;
 
 procedure TCastleText.SetText(const Value: TStrings);

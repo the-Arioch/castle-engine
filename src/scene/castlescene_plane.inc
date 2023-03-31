@@ -1,3 +1,4 @@
+{%MainUnit castlescene.pas}
 {
   Copyright 2021-2022 Michalis Kamburelis.
 
@@ -164,6 +165,7 @@ begin
   begin
     FAxis := Value;
     UpdateCoordinateNode;
+    UpdateCollider;
   end;
 end;
 

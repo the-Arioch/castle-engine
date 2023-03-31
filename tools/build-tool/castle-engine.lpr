@@ -1,5 +1,5 @@
 {
-  Copyright 2014-2022 Michalis Kamburelis.
+  Copyright 2014-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -29,7 +29,8 @@ uses SysUtils,
   CastleFilesUtils, CastleURIUtils, CastleStringUtils,
   CastleApplicationProperties,
   ToolPackageFormat, ToolProject, ToolCompile, ToolIOS, ToolAndroid, ToolManifest,
-  ToolNintendoSwitch, ToolCommonUtils, ToolArchitectures, ToolUtils, ToolProcessWait;
+  ToolNintendoSwitch, ToolCommonUtils, ToolArchitectures, ToolUtils, ToolProcess,
+  ToolCache;
 
 var
   Target: TTarget;
@@ -178,9 +179,15 @@ begin
             '      version' + NL +
             '      version-code' + NL +
             NL+
+            'cache' +NL+
+            '    Create cache to speed up future compilations.' + NL +
+            NL+
+            'cache-clean' +NL+
+            '    Remove the cache directory.' + NL +
+            NL+
             'Available options are:' +NL+
-            HelpOptionHelp +NL+
-            VersionOptionHelp +NL+
+            OptionDescription('-h / --help', 'Print this help message and exit.') + NL +
+            OptionDescription('-v / --version', 'Print the version number and exit.') + NL +
             OptionDescription('-V / --verbose',
               'Verbose mode, output contains e.g. list of packaged files.') +NL+
             OptionDescription('--mode=debug|release',
@@ -346,6 +353,16 @@ begin
         {$endif}
       end;
     finally FreeAndNil(SimpleCompileOptions) end;
+  end else
+  if Command = 'cache' then
+  begin
+    Parameters.CheckHigh(1);
+    CacheCreate(OverrideCompiler, Target, OS, CPU);
+  end else
+  if Command = 'cache-clean' then
+  begin
+    Parameters.CheckHigh(1);
+    CacheClean;
   end else
   begin
     if (Command <> 'run') and (Command <> 'output') then

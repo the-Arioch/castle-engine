@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -31,7 +31,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdGeometry: TSFNode;
-    {  }
+    { Internal wrapper for property @link(Geometry). This wrapper API may change, we advise to access simpler @link(Geometry) instead. }
     public property FdGeometry: TSFNode read FFdGeometry;
     {  }
     property Geometry: TAbstractGeometryNode read GetGeometry write SetGeometry;

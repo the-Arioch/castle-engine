@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -32,13 +32,15 @@
     function GetFogCoord: TFogCoordinateNode;
     procedure SetFogCoord(const Value: TFogCoordinateNode);
 {$endif not CASTLE_SLIM_NODES}
+    function GetMode: TLineMode;
+    procedure SetMode(const Value: TLineMode);
   public
     procedure CreateNode; override;
     class function ClassX3DType: string; override;
 
 {$ifndef CASTLE_SLIM_NODES}
     strict private FFdAttrib: TMFNode;
-    {  }
+    { Internal wrapper for property @link(Attrib). This wrapper API may change, we advise to access simpler @link(Attrib) instead. }
     public property FdAttrib: TMFNode read FFdAttrib;
 {$endif not CASTLE_SLIM_NODES}
 {$ifndef CASTLE_SLIM_NODES}
@@ -47,20 +49,20 @@
 {$endif not CASTLE_SLIM_NODES}
 
     strict private FFdColor: TSFNode;
-    {  }
+    { Internal wrapper for property @link(Color). This wrapper API may change, we advise to access simpler @link(Color) instead. }
     public property FdColor: TSFNode read FFdColor;
     {  }
     property Color: TAbstractColorNode read GetColor write SetColor;
 
     strict private FFdCoord: TSFNode;
-    {  }
+    { Internal wrapper for property @link(Coord). This wrapper API may change, we advise to access simpler @link(Coord) instead. }
     public property FdCoord: TSFNode read FFdCoord;
     {  }
     property Coord: TAbstractCoordinateNode read GetCoord write SetCoord;
 
 {$ifndef CASTLE_SLIM_NODES}
     strict private FFdFogCoord: TSFNode;
-    {  }
+    { Internal wrapper for property @link(FogCoord). This wrapper API may change, we advise to access simpler @link(FogCoord) instead. }
     public property FdFogCoord: TSFNode read FFdFogCoord;
 {$endif not CASTLE_SLIM_NODES}
 {$ifndef CASTLE_SLIM_NODES}
@@ -69,12 +71,18 @@
 {$endif not CASTLE_SLIM_NODES}
 
     strict private FFdVertexCount: TMFInt32;
-    {  }
+    { Internal wrapper for property @link(VertexCount). This wrapper API may change, we advise to access simpler @link(VertexCount) instead. }
     public property FdVertexCount: TMFInt32 read FFdVertexCount;
     {  }
-    procedure SetVertexCount(const Value: array of LongInt); overload;
+    procedure SetVertexCount(const Value: array of Int32); overload;
     {  }
-    procedure SetVertexCount(const Value: TLongIntList); overload;
+    procedure SetVertexCount(const Value: TInt32List); overload;
+
+    strict private FFdMode: TSFStringEnum;
+    { Internal wrapper for property @link(Mode). This wrapper API may change, we advise to access simpler @link(Mode) instead. }
+    public property FdMode: TSFStringEnum read FFdMode;
+    { How to interpret the vertexes: as a set of strips, loops, or just pairs of vertexes. See possible @link(TLineMode) values for details. }
+    property Mode: TLineMode read GetMode write SetMode;
 
 {$endif read_interface}
 
@@ -137,14 +145,24 @@ begin
 end;
 
 {$endif not CASTLE_SLIM_NODES}
-procedure TLineSetNode.SetVertexCount(const Value: array of LongInt);
+procedure TLineSetNode.SetVertexCount(const Value: array of Int32);
 begin
   FdVertexCount.Send(Value);
 end;
 
-procedure TLineSetNode.SetVertexCount(const Value: TLongIntList);
+procedure TLineSetNode.SetVertexCount(const Value: TInt32List);
 begin
   FdVertexCount.Send(Value);
+end;
+
+function TLineSetNode.GetMode: TLineMode;
+begin
+  Result := TLineMode(FdMode.EnumValue);
+end;
+
+procedure TLineSetNode.SetMode(const Value: TLineMode);
+begin
+  FdMode.SendEnumValue(Ord(Value));
 end;
 
 class function TLineSetNode.ClassX3DType: String;
@@ -179,6 +197,10 @@ begin
   FFdVertexCount := TMFInt32.Create(Self, True, 'vertexCount', []);
    FdVertexCount.ChangeAlways := chGeometry;
   AddField(FFdVertexCount);
+
+  FFdMode := TSFStringEnum.Create(Self, False, 'mode', @LineModeNames, Ord(High(LineModeNames)) + 1, Ord(lmStrip));
+   FdMode.ChangeAlways := chGeometry;
+  AddField(FFdMode);
 end;
 
 {$endif read_implementation}

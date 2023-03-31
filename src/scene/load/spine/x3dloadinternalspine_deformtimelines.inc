@@ -1,3 +1,4 @@
+{%MainUnit x3dloadinternalspine.pas}
 {
   Copyright 2019 Trung Le (kagamma).
 
@@ -155,12 +156,8 @@ var
   VertexList: TSingleList;
   EventValueChanged: TX3DEvent;
   N: TCoordinateInterpolatorNode;
-  {$ifdef FPC}
   NC: TCubicBezierCoordinateInterpolatorNode;
-  {$endif}
 begin
-  // TODO: Delphi support
-  {$ifdef FPC}
   if Curve then
   begin
     NC := TCubicBezierCoordinateInterpolatorNode.Create('DeformTimeline_' + Slot.Name);
@@ -181,7 +178,6 @@ begin
     EventValueChanged := NC.EventValue_changed;
     Node := NC;
   end else
-  {$endif}
   begin
     N := TCoordinateInterpolatorNode.Create('DeformTimeline_' + Slot.Name);
     for I := 0 to Time.Count - 1 do

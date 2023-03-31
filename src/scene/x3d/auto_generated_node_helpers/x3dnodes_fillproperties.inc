@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -37,25 +37,25 @@
     class function ClassX3DType: string; override;
 
     strict private FFdFilled: TSFBool;
-    {  }
+    { Internal wrapper for property @link(Filled). This wrapper API may change, we advise to access simpler @link(Filled) instead. }
     public property FdFilled: TSFBool read FFdFilled;
     {  }
     property Filled: Boolean read GetFilled write SetFilled;
 
     strict private FFdHatchColor: TSFColor;
-    {  }
+    { Internal wrapper for property @link(HatchColor). This wrapper API may change, we advise to access simpler @link(HatchColor) instead. }
     public property FdHatchColor: TSFColor read FFdHatchColor;
     {  }
     property HatchColor: TCastleColorRGB read GetHatchColor write SetHatchColor;
 
     strict private FFdHatched: TSFBool;
-    {  }
+    { Internal wrapper for property @link(Hatched). This wrapper API may change, we advise to access simpler @link(Hatched) instead. }
     public property FdHatched: TSFBool read FFdHatched;
     {  }
     property Hatched: Boolean read GetHatched write SetHatched;
 
     strict private FFdHatchStyle: TSFInt32;
-    {  }
+    { Internal wrapper for property @link(HatchStyle). This wrapper API may change, we advise to access simpler @link(HatchStyle) instead. }
     public property FdHatchStyle: TSFInt32 read FFdHatchStyle;
     {  }
     property HatchStyle: Integer read GetHatchStyle write SetHatchStyle;

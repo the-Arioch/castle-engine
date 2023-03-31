@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -31,7 +31,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdKeyValue: TMFRotation;
-    {  }
+    { Internal wrapper for property @link(KeyValue). This wrapper API may change, we advise to access simpler @link(KeyValue) instead. }
     public property FdKeyValue: TMFRotation read FFdKeyValue;
     {  }
     procedure SetKeyValue(const Value: array of TVector4); overload;
@@ -39,7 +39,7 @@
     procedure SetKeyValue(const Value: TVector4List); overload;
 
     strict private FFdNormalizeVelocity: TSFBool;
-    {  }
+    { Internal wrapper for property @link(NormalizeVelocity). This wrapper API may change, we advise to access simpler @link(NormalizeVelocity) instead. }
     public property FdNormalizeVelocity: TSFBool read FFdNormalizeVelocity;
     {  }
     property NormalizeVelocity: Boolean read GetNormalizeVelocity write SetNormalizeVelocity;

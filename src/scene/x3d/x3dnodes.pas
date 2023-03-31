@@ -1,5 +1,5 @@
 {
-  Copyright 2002-2022 Michalis Kamburelis.
+  Copyright 2002-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -161,9 +161,8 @@ unit X3DNodes;
 
 {$I castleconf.inc}
 
-// TODO: Under Delphi we don't support CastleScript for now
-{$ifdef FPC}
-  {$define CASTLE_SCRIPT}
+{$ifdef CASTLE_STRICT_CLI}
+  {$error When CASTLE_STRICT_CLI is defined, you cannot link to this unit.}
 {$endif}
 
 interface
@@ -172,8 +171,8 @@ uses SysUtils, Generics.Collections, Classes, XMLRead, DOM,
   CastleVectors, CastleRectangles, CastleTimeUtils, CastleFonts,
   CastleInternalX3DLexer, CastleUtils, CastleClassUtils,
   X3DFields, CastleBoxes, CastleImages, CastleColors, CastleCameras,
-  CastleVideos, X3DTime, CastleTransform, CastleMaterialProperties,
-  {$ifdef CASTLE_SCRIPT}CastleScript, CastleInternalX3DScript, {$endif} CastleInternalOctree,
+  CastleVideos, X3DTime, CastleTransform, CastleInternalMaterialProperties,
+  CastleScript, CastleInternalX3DScript, CastleInternalOctree,
   CastleInternalCompositeImage,
   CastleTextureImages, CastleKeysMouse, CastleSoundEngine, CastleStringUtils,
   CastleTextureFontData, CastleRenderOptions, CastleProjection, CastleBehaviors;
@@ -237,7 +236,6 @@ type
   {$I x3dnodes_1.inc}
   {$I x3dnodes_inventor.inc}
   {$I x3dnodes_97_hanim.inc}
-  {$I x3dnodes_97_nurbs.inc}
   {$I x3dnodes_castle.inc}
   {$I x3dnodes_instantreality.inc}
 
@@ -260,9 +258,6 @@ type
 
 implementation
 
-// Silence warnings about using CastleNURBS (that will soon be renamed CastleInternalNurbs)
-{$warnings off}
-
 uses
   { Fonts for Text, FontStyle, AsciiText nodes }
   CastleTextureFont_DjvSans_20,
@@ -284,11 +279,9 @@ uses
 
   Math, X3DLoad, CastleInternalZStream, X3DCameraUtils,
   CastleFilesUtils, StrUtils, CastleURIUtils, CastleUnicode, CastleCurves,
-  CastleLog, {$ifdef CASTLE_SCRIPT}CastleScriptParser,{$endif} CastleInternalDataUri, URIParser, CastleDownload,
-  CastleNURBS, CastleQuaternions, CastleXMLUtils, CastleOpenDocument,
+  CastleLog, CastleScriptParser, CastleInternalDataUri, URIParser, CastleDownload,
+  CastleInternalNurbs, CastleQuaternions, CastleXMLUtils, CastleOpenDocument,
   CastleSoundBase, CastleTriangles, X3DLoadInternalUtils;
-
-{$warnings on}
 
 {$define read_implementation}
 
@@ -374,15 +367,20 @@ uses
 {$I x3dnodes_1.inc}
 {$I x3dnodes_inventor.inc}
 {$I x3dnodes_97_hanim.inc}
-{$I x3dnodes_97_nurbs.inc}
 {$I x3dnodes_castle.inc}
 {$I x3dnodes_instantreality.inc}
 
 { Auto-generated nodes code }
+{$I auto_generated_node_helpers/x3dnodes_abstractvrml1camera_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_abstractvrml1geometry_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_abstractvrml1indexed_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_abstractvrml1separator_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_abstractvrml1transformation_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_anchor.inc}
 {$I auto_generated_node_helpers/x3dnodes_appearance.inc}
 {$I auto_generated_node_helpers/x3dnodes_arc2d.inc}
 {$I auto_generated_node_helpers/x3dnodes_arcclose2d.inc}
+{$I auto_generated_node_helpers/x3dnodes_asciitext_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_audioclip.inc}
 {$I auto_generated_node_helpers/x3dnodes_background.inc}
 {$I auto_generated_node_helpers/x3dnodes_balljoint.inc}
@@ -416,21 +414,27 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_composedshader.inc}
 {$I auto_generated_node_helpers/x3dnodes_composedtexture3d.inc}
 {$I auto_generated_node_helpers/x3dnodes_cone.inc}
+{$I auto_generated_node_helpers/x3dnodes_cone_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_coneemitter.inc}
 {$I auto_generated_node_helpers/x3dnodes_contact.inc}
 {$I auto_generated_node_helpers/x3dnodes_contour2d.inc}
 {$I auto_generated_node_helpers/x3dnodes_contourpolyline2d.inc}
+{$I auto_generated_node_helpers/x3dnodes_converter.inc}
 {$I auto_generated_node_helpers/x3dnodes_coordinate.inc}
+{$I auto_generated_node_helpers/x3dnodes_coordinate3_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_coordinatedamper.inc}
 {$I auto_generated_node_helpers/x3dnodes_coordinatedouble.inc}
 {$I auto_generated_node_helpers/x3dnodes_coordinateinterpolator.inc}
 {$I auto_generated_node_helpers/x3dnodes_coordinateinterpolator2d.inc}
-{$ifdef FPC}{$I auto_generated_node_helpers/x3dnodes_cubicbezier2dorientationinterpolator.inc}{$endif}
-{$ifdef FPC}{$I auto_generated_node_helpers/x3dnodes_cubicbezierpositioninterpolator.inc}{$endif}
-{$ifdef FPC}{$I auto_generated_node_helpers/x3dnodes_cubicbeziercoordinateinterpolator.inc}{$endif}
+{$I auto_generated_node_helpers/x3dnodes_cube_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_cubicbezier2dorientationinterpolator.inc}
+{$I auto_generated_node_helpers/x3dnodes_cubicbeziercoordinateinterpolator.inc}
+{$I auto_generated_node_helpers/x3dnodes_cubicbezierpositioninterpolator.inc}
 {$I auto_generated_node_helpers/x3dnodes_cylinder.inc}
+{$I auto_generated_node_helpers/x3dnodes_cylinder_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_cylindersensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_directionallight.inc}
+{$I auto_generated_node_helpers/x3dnodes_directionallight_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_disentitymanager.inc}
 {$I auto_generated_node_helpers/x3dnodes_disentitytypemapping.inc}
 {$I auto_generated_node_helpers/x3dnodes_disk2d.inc}
@@ -463,6 +467,7 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_geotransform.inc}
 {$I auto_generated_node_helpers/x3dnodes_geoviewpoint.inc}
 {$I auto_generated_node_helpers/x3dnodes_group.inc}
+{$I auto_generated_node_helpers/x3dnodes_group_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_hanimdisplacer.inc}
 {$I auto_generated_node_helpers/x3dnodes_hanimhumanoid.inc}
 {$I auto_generated_node_helpers/x3dnodes_hanimjoint.inc}
@@ -473,20 +478,22 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_imagetexture.inc}
 {$I auto_generated_node_helpers/x3dnodes_imagetexture3d.inc}
 {$I auto_generated_node_helpers/x3dnodes_indexedfaceset.inc}
+{$I auto_generated_node_helpers/x3dnodes_indexedfaceset_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_indexedlineset.inc}
+{$I auto_generated_node_helpers/x3dnodes_indexedlineset_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_indexedquadset.inc}
 {$I auto_generated_node_helpers/x3dnodes_indexedtrianglefanset.inc}
+{$I auto_generated_node_helpers/x3dnodes_indexedtrianglemesh_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_indexedtriangleset.inc}
 {$I auto_generated_node_helpers/x3dnodes_indexedtrianglestripset.inc}
+{$I auto_generated_node_helpers/x3dnodes_info_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_inline.inc}
 {$I auto_generated_node_helpers/x3dnodes_inlineloadcontrol.inc}
 {$I auto_generated_node_helpers/x3dnodes_integersequencer.inc}
 {$I auto_generated_node_helpers/x3dnodes_integertrigger.inc}
 {$I auto_generated_node_helpers/x3dnodes_kambiappearance.inc}
-{$I auto_generated_node_helpers/x3dnodes_kambiheadlight.inc}
 {$I auto_generated_node_helpers/x3dnodes_kambiinline.inc}
 {$I auto_generated_node_helpers/x3dnodes_kambinavigationinfo.inc}
-{$I auto_generated_node_helpers/x3dnodes_kambioctreeproperties.inc}
 {$I auto_generated_node_helpers/x3dnodes_keysensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_layer.inc}
 {$I auto_generated_node_helpers/x3dnodes_layerset.inc}
@@ -499,11 +506,14 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_loadsensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_localfog.inc}
 {$I auto_generated_node_helpers/x3dnodes_lod.inc}
+{$I auto_generated_node_helpers/x3dnodes_lod_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_logger.inc}
 {$I auto_generated_node_helpers/x3dnodes_material.inc}
+{$I auto_generated_node_helpers/x3dnodes_material_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_matrix3vertexattribute.inc}
 {$I auto_generated_node_helpers/x3dnodes_matrix4vertexattribute.inc}
 {$I auto_generated_node_helpers/x3dnodes_matrixtransform.inc}
+{$I auto_generated_node_helpers/x3dnodes_matrixtransform_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_metadataboolean.inc}
 {$I auto_generated_node_helpers/x3dnodes_metadatadouble.inc}
 {$I auto_generated_node_helpers/x3dnodes_metadatafloat.inc}
@@ -534,9 +544,11 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_orientationdamper.inc}
 {$I auto_generated_node_helpers/x3dnodes_orientationinterpolator.inc}
 {$I auto_generated_node_helpers/x3dnodes_orientationinterpolator2d.inc}
+{$I auto_generated_node_helpers/x3dnodes_orthographiccamera_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_orthoviewpoint.inc}
 {$I auto_generated_node_helpers/x3dnodes_packagedshader.inc}
 {$I auto_generated_node_helpers/x3dnodes_particlesystem.inc}
+{$I auto_generated_node_helpers/x3dnodes_perspectivecamera_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_physicalmaterial.inc}
 {$I auto_generated_node_helpers/x3dnodes_pickablegroup.inc}
 {$I auto_generated_node_helpers/x3dnodes_pixeltexture.inc}
@@ -545,12 +557,13 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_planesensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_pointemitter.inc}
 {$I auto_generated_node_helpers/x3dnodes_pointlight.inc}
+{$I auto_generated_node_helpers/x3dnodes_pointlight_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_pointpicksensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_pointset.inc}
+{$I auto_generated_node_helpers/x3dnodes_pointset_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_polyline2d.inc}
 {$I auto_generated_node_helpers/x3dnodes_polylineemitter.inc}
 {$I auto_generated_node_helpers/x3dnodes_polypoint2d.inc}
-{$I auto_generated_node_helpers/x3dnodes_x3dpositionallightnode.inc}
 {$I auto_generated_node_helpers/x3dnodes_positionchaser.inc}
 {$I auto_generated_node_helpers/x3dnodes_positionchaser2d.inc}
 {$I auto_generated_node_helpers/x3dnodes_positiondamper.inc}
@@ -567,12 +580,16 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_renderedtexture.inc}
 {$I auto_generated_node_helpers/x3dnodes_rigidbody.inc}
 {$I auto_generated_node_helpers/x3dnodes_rigidbodycollection.inc}
+{$I auto_generated_node_helpers/x3dnodes_rotation_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_rotationxyz_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_scalarchaser.inc}
 {$I auto_generated_node_helpers/x3dnodes_scalarinterpolator.inc}
+{$I auto_generated_node_helpers/x3dnodes_scale_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_screeneffect.inc}
 {$I auto_generated_node_helpers/x3dnodes_screenfontstyle.inc}
 {$I auto_generated_node_helpers/x3dnodes_screengroup.inc}
 {$I auto_generated_node_helpers/x3dnodes_script.inc}
+{$I auto_generated_node_helpers/x3dnodes_separator_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_shaderpart.inc}
 {$I auto_generated_node_helpers/x3dnodes_shaderprogram.inc}
 {$I auto_generated_node_helpers/x3dnodes_shadertexture.inc}
@@ -582,23 +599,29 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_sliderjoint.inc}
 {$I auto_generated_node_helpers/x3dnodes_sound.inc}
 {$I auto_generated_node_helpers/x3dnodes_sphere.inc}
+{$I auto_generated_node_helpers/x3dnodes_sphere_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_spheresensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_splinepositioninterpolator.inc}
 {$I auto_generated_node_helpers/x3dnodes_splinepositioninterpolator2d.inc}
 {$I auto_generated_node_helpers/x3dnodes_splinescalarinterpolator.inc}
 {$I auto_generated_node_helpers/x3dnodes_spotlight.inc}
+{$I auto_generated_node_helpers/x3dnodes_spotlight_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_squadorientationinterpolator.inc}
 {$I auto_generated_node_helpers/x3dnodes_staticgroup.inc}
 {$I auto_generated_node_helpers/x3dnodes_stringsensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_surfaceemitter.inc}
 {$I auto_generated_node_helpers/x3dnodes_switch.inc}
+{$I auto_generated_node_helpers/x3dnodes_switch_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_tangent.inc}
 {$I auto_generated_node_helpers/x3dnodes_teapot.inc}
 {$I auto_generated_node_helpers/x3dnodes_texcoorddamper2d.inc}
 {$I auto_generated_node_helpers/x3dnodes_text.inc}
 {$I auto_generated_node_helpers/x3dnodes_text3d.inc}
+{$I auto_generated_node_helpers/x3dnodes_texture2_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_texture2transform_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_texturebackground.inc}
 {$I auto_generated_node_helpers/x3dnodes_texturecoordinate.inc}
+{$I auto_generated_node_helpers/x3dnodes_texturecoordinate2_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_texturecoordinate3d.inc}
 {$I auto_generated_node_helpers/x3dnodes_texturecoordinate4d.inc}
 {$I auto_generated_node_helpers/x3dnodes_texturecoordinategenerator.inc}
@@ -611,7 +634,10 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_toggler.inc}
 {$I auto_generated_node_helpers/x3dnodes_touchsensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_transform.inc}
+{$I auto_generated_node_helpers/x3dnodes_transform_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_transformsensor.inc}
+{$I auto_generated_node_helpers/x3dnodes_transformseparator_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_translation_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_transmitterpdu.inc}
 {$I auto_generated_node_helpers/x3dnodes_trianglefanset.inc}
 {$I auto_generated_node_helpers/x3dnodes_triangleset.inc}
@@ -631,6 +657,8 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_volumepicksensor.inc}
 {$I auto_generated_node_helpers/x3dnodes_windphysicsmodel.inc}
 {$I auto_generated_node_helpers/x3dnodes_worldinfo.inc}
+{$I auto_generated_node_helpers/x3dnodes_wwwanchor_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_wwwinline_1.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3d3dbackgroundnode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dappearancechildnode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dappearancenode.inc}
@@ -641,7 +669,7 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_x3dcolornode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dcomposedgeometrynode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dcoordinatenode.inc}
-{$ifdef FPC}{$I auto_generated_node_helpers/x3dnodes_x3dcubicbezierinterpolator.inc}{$endif}
+{$I auto_generated_node_helpers/x3dnodes_x3dcubicbezierinterpolator.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3ddampernode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3ddirectionallightnode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3ddragsensornode.inc}
@@ -674,6 +702,7 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_x3dpicksensornode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dpointingdevicesensornode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dpointlightnode.inc}
+{$I auto_generated_node_helpers/x3dnodes_x3dpositionallightnode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dproductstructurechildnode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dpunctuallightnode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3drigidjointnode.inc}
@@ -699,6 +728,13 @@ uses
 {$I auto_generated_node_helpers/x3dnodes_x3dviewpointnode.inc}
 {$I auto_generated_node_helpers/x3dnodes_x3dviewportnode.inc}
 
+{$warnings off} // uses deprecated constants like FSFAMILY_SERIF, we don't really plan to update it -- whole VRML 1 is deprecated
+{$I auto_generated_node_helpers/x3dnodes_fontstyle_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_materialbinding_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_normalbinding_1.inc}
+{$I auto_generated_node_helpers/x3dnodes_shapehints_1.inc}
+{$warnings on}
+
 { unit init/fini ------------------------------------------------------------ }
 
 procedure X3DNodesFinalization;
@@ -712,6 +748,8 @@ begin
   FreeAndNil(AnyNodeDestructionNotifications);
 
   FreeAndNil(CurrentlyLoading);
+
+  FontsFinalization;
 end;
 
 initialization
@@ -724,7 +762,6 @@ initialization
   RegistedInventorNodes;
   RegisterVRML1Nodes;
   RegisterVRML97HAnimNodes;
-  RegisterVRML97NodesNurbs;
   RegisterKambiNodes;
   RegisterInstantRealityNodes;
 
@@ -743,10 +780,7 @@ initialization
   RegisterLightingNodes;
   RegisterTexturingNodes;
   RegisterInterpolationNodes;
-  // TODO: Delphi support
-  {$ifdef FPC}
   RegisterInterpolationCubicBezierNodes;
-  {$endif}
   RegisterPointingDeviceSensorNodes;
   RegisterKeyDeviceSensorNodes;
   RegisterEnvironmentalSensorNodes;
@@ -776,12 +810,15 @@ initialization
   TraverseSingleStack := TX3DGraphTraverseStateStack.Create;
 
   CurrentlyLoading := TCastleStringList.Create;
+
+  FontsInitialization;
 finalization
   { Because of various finalization order (some stuff may be owned
     e.g. by CastleWindow.Application, and freed at CastleWindow finalization,
     which may be done after X3DNodes finalization) we may defer
     finalization for later. }
   if (X3DCache = nil) or X3DCache.Empty then
-    X3DNodesFinalization else
+    X3DNodesFinalization
+  else
     X3DCache.OnEmpty := @X3DNodesFinalization;
 end.

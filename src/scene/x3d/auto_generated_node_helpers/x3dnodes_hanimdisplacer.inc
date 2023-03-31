@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -24,6 +24,8 @@
 {$ifdef read_interface}
 
   strict private
+    function GetDescription: String;
+    procedure SetDescription(const Value: String);
     function GetNameField: String;
     procedure SetNameField(const Value: String);
     function GetWeight: Single;
@@ -33,15 +35,21 @@
     class function ClassX3DType: string; override;
 
     strict private FFdCoordIndex: TMFInt32;
-    {  }
+    { Internal wrapper for property @link(CoordIndex). This wrapper API may change, we advise to access simpler @link(CoordIndex) instead. }
     public property FdCoordIndex: TMFInt32 read FFdCoordIndex;
     {  }
-    procedure SetCoordIndex(const Value: array of LongInt); overload;
+    procedure SetCoordIndex(const Value: array of Int32); overload;
     {  }
-    procedure SetCoordIndex(const Value: TLongIntList); overload;
+    procedure SetCoordIndex(const Value: TInt32List); overload;
+
+    strict private FFdDescription: TSFString;
+    { Internal wrapper for property @link(Description). This wrapper API may change, we advise to access simpler @link(Description) instead. }
+    public property FdDescription: TSFString read FFdDescription;
+    {  }
+    property Description: String read GetDescription write SetDescription;
 
     strict private FFdDisplacements: TMFVec3f;
-    {  }
+    { Internal wrapper for property @link(Displacements). This wrapper API may change, we advise to access simpler @link(Displacements) instead. }
     public property FdDisplacements: TMFVec3f read FFdDisplacements;
     {  }
     procedure SetDisplacements(const Value: array of TVector3); overload;
@@ -49,13 +57,13 @@
     procedure SetDisplacements(const Value: TVector3List); overload;
 
     strict private FFdName: TSFString;
-    {  }
+    { Internal wrapper for property @link(NameField). This wrapper API may change, we advise to access simpler @link(NameField) instead. }
     public property FdName: TSFString read FFdName;
     {  }
     property NameField: String read GetNameField write SetNameField;
 
     strict private FFdWeight: TSFFloat;
-    {  }
+    { Internal wrapper for property @link(Weight). This wrapper API may change, we advise to access simpler @link(Weight) instead. }
     public property FdWeight: TSFFloat read FFdWeight;
     {  }
     property Weight: Single read GetWeight write SetWeight;
@@ -66,14 +74,24 @@
 
 { THAnimDisplacerNode ----------------------------------------------- }
 
-procedure THAnimDisplacerNode.SetCoordIndex(const Value: array of LongInt);
+procedure THAnimDisplacerNode.SetCoordIndex(const Value: array of Int32);
 begin
   FdCoordIndex.Send(Value);
 end;
 
-procedure THAnimDisplacerNode.SetCoordIndex(const Value: TLongIntList);
+procedure THAnimDisplacerNode.SetCoordIndex(const Value: TInt32List);
 begin
   FdCoordIndex.Send(Value);
+end;
+
+function THAnimDisplacerNode.GetDescription: String;
+begin
+  Result := FdDescription.Value;
+end;
+
+procedure THAnimDisplacerNode.SetDescription(const Value: String);
+begin
+  FdDescription.Send(Value);
 end;
 
 procedure THAnimDisplacerNode.SetDisplacements(const Value: array of TVector3);
@@ -118,6 +136,10 @@ begin
   FFdCoordIndex := TMFInt32.Create(Self, True, 'coordIndex', []);
    FdCoordIndex.ChangeAlways := chVisibleNonGeometry;
   AddField(FFdCoordIndex);
+
+  FFdDescription := TSFString.Create(Self, True, 'description', '');
+   FdDescription.ChangeAlways := chNone;
+  AddField(FFdDescription);
 
   FFdDisplacements := TMFVec3f.Create(Self, True, 'displacements', []);
    FdDisplacements.ChangeAlways := chVisibleNonGeometry;

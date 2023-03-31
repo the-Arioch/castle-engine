@@ -143,6 +143,16 @@ type
     function AverageSize(const AllowZero: boolean;
       const EmptyBoxSize: Single): Single; overload;
 
+    { Average size of TBox3D, or EmptyBoxSize if box is empty.
+      2D box projection is obtained by rejecting the IgnoreIndex coordinate
+      (must be 0, 1 or 2).
+
+      @param(AllowZero Decides what to do when box is not empty but the result
+        would be zero, which means that the box is infinitely thin in all axes.
+        If @true, then result is just 0, otherwise it's EmptyBoxSize.) }
+    function AverageSize2D(const AllowZero: boolean;
+      const EmptyBoxSize: Single; const IgnoreIndex: T3DAxis): Single; overload;
+
     { Largest size of TBox3D, or EmptyBoxSize if box is empty.
       @param(AllowZero Decides what to do when box is not empty but the result
         would be zero, which means that the box is infinitely thin in all axes.
@@ -777,6 +787,28 @@ begin
     Result := ((Data[1].X - Data[0].X) +
                (Data[1].Y - Data[0].Y) +
                (Data[1].Z - Data[0].Z)) / 3;
+    if (not AllowZero) and (Result = 0) then
+      Result := EmptyBoxSize;
+  end;
+end;
+
+function TBox3D.AverageSize2D(const AllowZero: boolean;
+  const EmptyBoxSize: Single; const IgnoreIndex: T3DAxis): Single;
+begin
+  if IsEmpty then
+    Result := EmptyBoxSize else
+  begin
+    case IgnoreIndex of
+      0: Result := ((Data[1].Y - Data[0].Y) +
+                    (Data[1].Z - Data[0].Z)) / 2;
+      1: Result := ((Data[1].X - Data[0].X) +
+                    (Data[1].Z - Data[0].Z)) / 2;
+      2: Result := ((Data[1].X - Data[0].X) +
+                    (Data[1].Y - Data[0].Y)) / 2;
+      {$ifndef COMPILER_CASE_ANALYSIS}
+      else raise EInternalError.Create(20221209);
+      {$endif}
+    end;
     if (not AllowZero) and (Result = 0) then
       Result := EmptyBoxSize;
   end;
@@ -1553,7 +1585,7 @@ function TBox3D.IsTriangleCollision(const Triangle: TTriangle3): boolean;
 
 { Implementation based on
   [http://jgt.akpeters.com/papers/AkenineMoller01/tribox.html],
-  by Tomas Akenine-Möller, described
+  by Tomas Akenine-MÃ¶ller, described
   in his paper [http://jgt.akpeters.com/papers/AkenineMoller01/]
   "Fast 3D Triangle-Box Overlap Testing", downloadable from
   [http://www.cs.lth.se/home/Tomas_Akenine_Moller/pubs/tribox.pdf].
@@ -2260,12 +2292,14 @@ begin
     ( B.IsEmpty or
       ( PointsDistanceSqr(A.Center, SortPosition) >
         PointsDistanceSqr(B.Center, SortPosition))) then
-    Result := -1 else
+    Result := -1
+  else
   if (not B.IsEmpty) and
     ( A.IsEmpty or
       ( PointsDistanceSqr(B.Center, SortPosition) >
         PointsDistanceSqr(A.Center, SortPosition))) then
-    Result :=  1 else
+    Result :=  1
+  else
     Result :=  0;
 end;
 

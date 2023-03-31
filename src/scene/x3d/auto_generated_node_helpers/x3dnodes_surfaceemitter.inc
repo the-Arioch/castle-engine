@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -35,15 +35,15 @@
     public property EventSet_coordIndex: TMFInt32Event read FEventSet_coordIndex;
 
     strict private FFdCoordIndex: TMFInt32;
-    {  }
+    { Internal wrapper for property @link(CoordIndex). This wrapper API may change, we advise to access simpler @link(CoordIndex) instead. }
     public property FdCoordIndex: TMFInt32 read FFdCoordIndex;
     {  }
-    procedure SetCoordIndex(const Value: array of LongInt); overload;
+    procedure SetCoordIndex(const Value: array of Int32); overload;
     {  }
-    procedure SetCoordIndex(const Value: TLongIntList); overload;
+    procedure SetCoordIndex(const Value: TInt32List); overload;
 
     strict private FFdSurface: TSFNode;
-    {  }
+    { Internal wrapper for property @link(Surface). This wrapper API may change, we advise to access simpler @link(Surface) instead. }
     public property FdSurface: TSFNode read FFdSurface;
     {  }
     property Surface: TAbstractGeometryNode read GetSurface write SetSurface;
@@ -54,12 +54,12 @@
 
 { TSurfaceEmitterNode ----------------------------------------------- }
 
-procedure TSurfaceEmitterNode.SetCoordIndex(const Value: array of LongInt);
+procedure TSurfaceEmitterNode.SetCoordIndex(const Value: array of Int32);
 begin
   FdCoordIndex.Send(Value);
 end;
 
-procedure TSurfaceEmitterNode.SetCoordIndex(const Value: TLongIntList);
+procedure TSurfaceEmitterNode.SetCoordIndex(const Value: TInt32List);
 begin
   FdCoordIndex.Send(Value);
 end;

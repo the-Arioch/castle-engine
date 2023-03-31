@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -31,7 +31,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdMapping: TSFString;
-    {  }
+    { Internal wrapper for property @link(Mapping). This wrapper API may change, we advise to access simpler @link(Mapping) instead. }
     public property FdMapping: TSFString read FFdMapping;
     {  }
     property Mapping: String read GetMapping write SetMapping;
@@ -62,7 +62,7 @@ begin
   inherited;
 
   FFdMapping := TSFString.Create(Self, True, 'mapping', '');
-   FdMapping.ChangeAlways := chVisibleNonGeometry;
+   FdMapping.ChangeAlways := chTextureCoordinate;
   AddField(FFdMapping);
 end;
 

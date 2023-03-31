@@ -1,5 +1,5 @@
 {
-  Copyright 2018-2022 Michalis Kamburelis.
+  Copyright 2018-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -29,9 +29,10 @@ interface
 uses
   Classes, SysUtils, DOM, FileUtil, Forms, Controls, Graphics, Dialogs, Menus,
   ExtCtrls, ComCtrls, CastleShellCtrls, StdCtrls, ValEdit, ActnList, Buttons,
-  AnchorDocking, XMLPropStorage,
+  AnchorDocking, XMLPropStorage, ImgList,
   ProjectUtils, Types, Contnrs, CastleControl, CastleUIControls,
   CastlePropEdits, CastleDialogs, X3DNodes, CastleFindFiles,
+  DataModuleIcons,
   EditorUtils, FrameDesign, FrameViewFile, FormNewUnit, ToolManifest,
   ToolPackageFormat;
 
@@ -42,10 +43,35 @@ const
 type
   { Main project management. }
   TProjectForm = class(TForm)
+    ActionShowStatistics: TAction;
+    ActionRunParameterCapabilitiesForceFixedFunction: TAction;
+    ActionRunParameterCapabilitiesForceModern: TAction;
+    ActionRunParameterCapabilitiesDefault: TAction;
+    ActionRunParameterDefaultWindowOrFullscreen: TAction;
+    ActionRunParameterRequestWindow: TAction;
+    ActionRunParameterRequestFullScreen: TAction;
+    ActionRunParameterDisableFpsLimit: TAction;
+    ActionRunParameterDisableSound: TAction;
+    ActionPlayStop: TAction;
+    ActionShowColliders: TAction;
+    ActionSimulationPlayStop: TAction;
+    ActionSimulationPauseUnpause: TAction;
+    ActionViewportRenderNext: TAction;
+    ActionViewportRenderSolidWireframe: TAction;
+    ActionPhysicsHideAllJointsTools: TAction;
+    ActionPhysicsShowAllJointsTools: TAction;
+    ActionModeSelect: TAction;
+    ActionModeTranslate: TAction;
+    ActionModeRotate: TAction;
+    ActionModeScale: TAction;
+    ActionModeInteract: TAction;
+    ActionFocusDesign: TAction;
     ActionWarningsCopyAll: TAction;
     ActionWarningsCopySelected: TAction;
     ActionWarningsClean: TAction;
     ActionViewportGridAxis: TAction;
+    ActionViewportRenderWireframeOnly: TAction;
+    ActionViewportRenderNormal: TAction;
     ActionComponentDuplicate: TAction;
     ActionComponentSaveSelected: TAction;
     ActionComponentDelete: TAction;
@@ -75,15 +101,61 @@ type
     ActionOutputClean: TAction;
     ActionNewSpriteSheet: TAction;
     ActionList: TActionList;
+    BitBtnPlayStop: TBitBtn;
+    BitBtnNewView: TBitBtn;
+    LabelOpenExistingView: TLabel;
+    ListOpenExistingView: TListView;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
     MenuItem15: TMenuItem;
     MenuItem21: TMenuItem;
     MenuItem22: TMenuItem;
+    MenuItem24: TMenuItem;
+    MenuItem27: TMenuItem;
+    MenuItem2888888: TMenuItem;
+    MenuItem28: TMenuItem;
+    MenuItem33: TMenuItem;
+    MenuItem39: TMenuItem;
+    MenuItem40: TMenuItem;
+    MenuItem41: TMenuItem;
+    Separator12: TMenuItem;
+    MenuItemRunParameterDefaultWindowOrFullscreen: TMenuItem;
+    Separator11: TMenuItem;
+    MenuItemRunParameterRequestWindow: TMenuItem;
+    MenuItemRunParameterRequestFullScreen: TMenuItem;
+    MenuItemRunParameterDisableFpsLimit: TMenuItem;
+    MenuItemRunParameterDisableSound: TMenuItem;
+    MenuItemRunParameters: TMenuItem;
+    PanelOpenExistingView: TPanel;
+    PanelNoDesign: TPanel;
+    PanelNoDesignTop: TPanel;
+    Separator9: TMenuItem;
+    MenuItem38: TMenuItem;
+    MenuItemSimulationPauseUnpause: TMenuItem;
+    MenuItemSimulationPlayStop: TMenuItem;
+    SeparatorBeforeShowColliders: TMenuItem;
+    MenuItemShowColliders: TMenuItem;
+    MenuItemPhysics: TMenuItem;
+    MenuItemCacheClean: TMenuItem;
+    MenuItemCache: TMenuItem;
+    SeparatorBeforeCache: TMenuItem;
+    MenuItemWireframe: TMenuItem;
+    MenuItem34: TMenuItem;
+    MenuItem35: TMenuItem;
+    MenuItem36: TMenuItem;
+    MenuItem37: TMenuItem;
+    Separator10: TMenuItem;
+    MenuShowJointTools28: TMenuItem;
+    MenuItem29: TMenuItem;
+    MenuItem30: TMenuItem;
+    MenuItem31: TMenuItem;
+    MenuItem32: TMenuItem;
+    Separator8: TMenuItem;
     Separator7: TMenuItem;
     MenuItem25: TMenuItem;
     MenuItem26: TMenuItem;
+    Separator888888: TMenuItem;
     WarningsPopup: TPopupMenu;
     Separator6: TMenuItem;
     MenuItem23: TMenuItem;
@@ -143,11 +215,13 @@ type
     ActionRegenerateProject: TAction;
     ActionEditAssociatedUnit: TAction;
     ActionNewUnitHereClass: TAction;
-    ActionNewUnitHereState: TAction;
+    ActionNewUnitHereView: TAction;
     ActionNewUnitHereEmpty: TAction;
+    ActionNewUnitHereBehavior: TAction;
     ActionNewUnitClass: TAction;
-    ActionNewUnitState: TAction;
+    ActionNewUnitView: TAction;
     ActionNewUnitEmpty: TAction;
+    ActionNewUnitBehavior: TAction;
     ActionEditUnit: TAction;
     ActionOpenProjectCode: TAction;
     ApplicationProperties1: TApplicationProperties;
@@ -157,12 +231,14 @@ type
     OpenPascalUnitDialog: TCastleOpenPascalUnitDialog;
     MenuItemPopupNewUnitEmpty: TMenuItem;
     MenuItemPopupNewUnitClass: TMenuItem;
-    MenuItemPopupNewUnitState: TMenuItem;
+    MenuItemPopupNewUnitView: TMenuItem;
+    MenuItemPopupNewUnitBehavior: TMenuItem;
     MenuItemPopupNewUnit: TMenuItem;
     N3: TMenuItem;
-    MenuItemNewUnitState: TMenuItem;
+    MenuItemNewUnitView: TMenuItem;
     MenuItemNewUnitClass: TMenuItem;
     MenuItemNewUnitEmpty: TMenuItem;
+    MenuItemNewUnitBehavior: TMenuItem;
     MenuItemNewUnit: TMenuItem;
     N2: TMenuItem;
     MenuItemEditUnitCode: TMenuItem;
@@ -173,7 +249,6 @@ type
     MenuItemShellTreeRefresh: TMenuItem;
     PanelWarnings: TPanel;
     ShellIcons: TImageList;
-    LabelNoDesign: TLabel;
     ListWarnings: TListBox;
     MenuItemRename: TMenuItem;
     MenuItemRedo: TMenuItem;
@@ -219,7 +294,7 @@ type
     ListOutput: TListBox;
     MainMenu1: TMainMenu;
     MenuItemSeparator101: TMenuItem;
-    MenuItemBreakProcess: TMenuItem;
+    MenuItemStopProcess: TMenuItem;
     MenuItemSeprator100: TMenuItem;
     MenuItemAutoGenerateClean: TMenuItem;
     MenuItemAutoGenerateTextures: TMenuItem;
@@ -252,12 +327,41 @@ type
     TabOutput: TTabSheet;
     ProcessUpdateTimer: TTimer;
     TabWarnings: TTabSheet;
+    procedure ActionPhysicsShowAllJointsToolsExecute(Sender: TObject);
+    procedure ActionPhysicsHideAllJointsToolsExecute(Sender: TObject);
+    procedure ActionFocusDesignExecute(Sender: TObject);
+    procedure ActionModeInteractExecute(Sender: TObject);
+    procedure ActionModeRotateExecute(Sender: TObject);
+    procedure ActionModeScaleExecute(Sender: TObject);
+    procedure ActionModeSelectExecute(Sender: TObject);
+    procedure ActionModeTranslateExecute(Sender: TObject);
+    procedure ActionPlayStopExecute(Sender: TObject);
+    procedure ActionPlayStopUpdate(Sender: TObject);
+    procedure ActionRunParameterCapabilitiesDefaultExecute(Sender: TObject);
+    procedure ActionRunParameterCapabilitiesForceFixedFunctionExecute(
+      Sender: TObject);
+    procedure ActionRunParameterCapabilitiesForceModernExecute(Sender: TObject);
+    procedure ActionRunParameterDefaultWindowOrFullscreenExecute(Sender: TObject
+      );
+    procedure ActionRunParameterDisableFpsLimitExecute(Sender: TObject);
+    procedure ActionRunParameterDisableSoundExecute(Sender: TObject);
+    procedure ActionRunParameterRequestFullScreenExecute(Sender: TObject);
+    procedure ActionRunParameterRequestWindowExecute(Sender: TObject);
+    procedure ActionShowCollidersExecute(Sender: TObject);
+    procedure ActionSimulationPauseUnpauseExecute(Sender: TObject);
+    procedure ActionSimulationPauseUnpauseUpdate(Sender: TObject);
+    procedure ActionSimulationPlayStopExecute(Sender: TObject);
+    procedure ActionSimulationPlayStopUpdate(Sender: TObject);
     procedure ActionViewportGridAxisExecute(Sender: TObject);
     procedure ActionComponentCutExecute(Sender: TObject);
     procedure ActionComponentSaveSelectedExecute(Sender: TObject);
     procedure ActionViewportAlignCameraToViewExecute(Sender: TObject);
     procedure ActionViewportAlignViewToCameraExecute(Sender: TObject);
     procedure ActionViewportGridAxisUpdate(Sender: TObject);
+    procedure ActionViewportRenderNextExecute(Sender: TObject);
+    procedure ActionViewportRenderNormalExecute(Sender: TObject);
+    procedure ActionViewportRenderSolidWireframeExecute(Sender: TObject);
+    procedure ActionViewportRenderWireframeOnlyExecute(Sender: TObject);
     procedure ActionViewportToggleProjectionExecute(Sender: TObject);
     procedure ActionNavigation2DExecute(Sender: TObject);
     procedure ActionNavigationExamineExecute(Sender: TObject);
@@ -270,10 +374,12 @@ type
     procedure ActionEditUnitExecute(Sender: TObject);
     procedure ActionNewUnitClassExecute(Sender: TObject);
     procedure ActionNewUnitEmptyExecute(Sender: TObject);
+    procedure ActionNewUnitViewExecute(Sender: TObject);
+    procedure ActionNewUnitBehaviorExecute(Sender: TObject);
     procedure ActionNewUnitHereClassExecute(Sender: TObject);
     procedure ActionNewUnitHereEmptyExecute(Sender: TObject);
-    procedure ActionNewUnitHereStateExecute(Sender: TObject);
-    procedure ActionNewUnitStateExecute(Sender: TObject);
+    procedure ActionNewUnitHereViewExecute(Sender: TObject);
+    procedure ActionNewUnitHereBehaviorExecute(Sender: TObject);
     procedure ActionOpenProjectCodeExecute(Sender: TObject);
     procedure ActionOutputCopyAllExecute(Sender: TObject);
     procedure ActionOutputCopySelectedExecute(Sender: TObject);
@@ -294,7 +400,9 @@ type
     procedure ActionWarningsCopyAllExecute(Sender: TObject);
     procedure ActionWarningsCopySelectedExecute(Sender: TObject);
     procedure ApplicationProperties1Activate(Sender: TObject);
+    procedure ApplicationProperties1Deactivate(Sender: TObject);
     procedure ApplicationProperties1Exception(Sender: TObject; E: Exception);
+    procedure FormChangeBounds(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
@@ -302,8 +410,10 @@ type
     procedure FormHide(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
-    procedure ListOutputClick(Sender: TObject);
+    procedure ListOpenExistingViewDblClick(Sender: TObject);
     procedure ListOutputDblClick(Sender: TObject);
+    procedure MenuItemCacheCleanClick(Sender: TObject);
+    procedure MenuItemCacheClick(Sender: TObject);
     procedure MenuItemDesignNewNonVisualClick(Sender: TObject);
     procedure MenuItemEnableDisableDockingClick(Sender: TObject);
     procedure MenuItemInstallClick(Sender: TObject);
@@ -329,7 +439,7 @@ type
     procedure MenuItemAutoGenerateCleanClick(Sender: TObject);
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemAutoGenerateTexturesClick(Sender: TObject);
-    procedure MenuItemBreakProcessClick(Sender: TObject);
+    procedure MenuItemStopProcessClick(Sender: TObject);
     procedure MenuItemCgeWwwClick(Sender: TObject);
     procedure MenuItemCleanClick(Sender: TObject);
     procedure MenuItemCompileClick(Sender: TObject);
@@ -393,6 +503,7 @@ type
       PlatformsInfo: TPlatformInfoList;
       CurrentPlatformInfo: Integer; //< Index to PlatformsInfo
       CurrentPackageFormat: TPackageFormat;
+      ListOpenExistingViewStr: TStringList;
       { Anchor docking forms }
       DesignForm: TForm;
       DesignHierarchyForm: TForm;
@@ -404,6 +515,9 @@ type
     procedure BuildToolCall(const Commands: array of String;
       const RestartOnSuccess: Boolean = false);
     procedure BuildToolCallFinished(Sender: TObject);
+    procedure ListOpenExistingViewAddFile(const FileInfo: TFileInfo;
+      var StopSearch: boolean);
+    procedure ListOpenExistingViewRefresh;
     procedure MenuItemAddComponentClick(Sender: TObject);
     procedure MenuItemDesignNewCustomRootClick(Sender: TObject);
     procedure MenuItemPackageFormatChangeClick(Sender: TObject);
@@ -424,17 +538,23 @@ type
       const PascalFileName: String;
       const Line: Integer = -1;
       const Column: Integer = -1);
-    procedure SetEnabledCommandRun(const AEnabled: Boolean);
+    procedure IsRunningChanged;
     procedure FreeProcess;
+    procedure RunningToggle(Sender: TObject);
+    function IsRunning: Boolean;
     procedure ShellListViewDoubleClick(Sender: TObject);
     procedure ShellListViewSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure ShowNewUnitForm(const AUnitType: TNewUnitType;
       const UnitOutputDirFromFileBrowser: Boolean);
+    function ShowStatistics: Boolean;
     procedure UpdateFormCaption(Sender: TObject);
     { Propose saving the hierarchy.
       Returns should we continue (user did not cancel). }
     function ProposeSaveDesign: Boolean;
+    { Propose saving the current design (if any) and then (unless user said "cancel")
+      open the given design URL. }
+    procedure ProposeOpenDesign(const DesignUrl: String);
     { Call always when Design<>nil value changed. }
     procedure DesignExistenceChanged;
     { Create Design, if nil. }
@@ -457,6 +577,9 @@ type
     procedure MenuItemPlatformChangeClick(Sender: TObject);
     procedure RestartEditor(Sender: TObject);
     procedure CurrentViewportChanged(Sender: TObject);
+    { Question about saving during physics simulation. }
+    function SaveDuringPhysicsSimulation: Boolean;
+    function IsCreatingNewDesignAvailable: Boolean;
   public
     { Open a project, given an absolute path to CastleEngineManifest.xml }
     procedure OpenProject(const ManifestUrl: String);
@@ -476,14 +599,20 @@ uses TypInfo, LCLType, RegExpr, StrUtils, LCLVersion,
   CastleTransform, CastleControls, CastleDownload, CastleApplicationProperties,
   CastleLog, CastleComponentSerialize, CastleSceneCore, CastleStringUtils,
   CastleFonts, X3DLoad, CastleFileFilters, CastleImages, CastleSoundEngine,
-  CastleClassUtils, CastleLclEditHack,
+  CastleClassUtils, CastleLclEditHack, CastleRenderOptions, CastleTimeUtils,
   FormAbout, FormChooseProject, FormPreferences, FormSpriteSheetEditor,
-  FormSystemInformation,
-  ToolCompilerInfo, ToolCommonUtils, ToolArchitectures, ToolProcessWait,
+  FormSystemInformation, FormRestartCustomEditor,
+  ToolCompilerInfo, ToolCommonUtils, ToolArchitectures, ToolProcess,
   ToolFpcVersion;
 
 procedure TProjectForm.MenuItemQuitClick(Sender: TObject);
 begin
+  if CastleApplicationMode in [appSimulation, appSimulationPaused] then
+  begin
+    InfoBox('Stop the physics simulation to be able to close editor.');
+    Exit;
+  end;
+
   if ProposeSaveDesign then
     Application.Terminate;
 end;
@@ -521,22 +650,59 @@ end;
 
 procedure TProjectForm.MenuItemSaveAsDesignClick(Sender: TObject);
 begin
+  if not SaveDuringPhysicsSimulation then
+    Exit;
+
   Assert(Design <> nil); // menu item is disabled otherwise
   PrepareSaveDesignDialog(SaveDesignDialog, Design.DesignRoot);
   SaveDesignDialog.Url := Design.DesignUrl;
   if SaveDesignDialog.Execute then
+  begin
     Design.SaveDesign(SaveDesignDialog.Url);
     // TODO: save DesignUrl somewhere? CastleEditorSettings.xml?
+
+    // make sure to show new file in "Files" in editor
+    RefreshFiles(rfFilesInCurrentDir);
+  end;
+
+  { On GTK, this happens when we open a dialog box, like open/save.
+    It's important to stop treating keys/mouse as pressed then.
+
+    Testcase:
+    - Make new design,
+    - add 3D viewport,
+    - press right mouse button and S (to move back),
+    - press Ctrl (invokes Save dialog),
+    - release all keys, press "Cancel",
+    -> without this line, TCastleControl would think "S" key is still down.
+
+    Note:
+    - TCastleControl.DoExit is not called in this case.
+    - Form OnDeactive is also not called (matches docs on
+      https://wiki.lazarus.freepascal.org/Event_order#Form.OnDeactivate ).
+    - ApplicationProperties1Deactivate is not effective workaround for this
+      (workarounds "open" but not "save" testcase for some reason,
+      maybe because of "S" and Ctrl+S interaction).
+  }
+  Design.ReleaseAllKeysAndMouse;
 end;
 
 procedure TProjectForm.MenuItemSaveDesignClick(Sender: TObject);
 begin
+  if not SaveDuringPhysicsSimulation then
+    Exit;
+
   Assert(Design <> nil); // menu item is disabled otherwise
 
   if Design.DesignUrl = '' then
     MenuItemSaveAsDesignClick(Sender)
   else
+  begin
     Design.SaveDesign(Design.DesignUrl);
+
+    // make sure to show new file in "Files" in editor
+    RefreshFiles(rfFilesInCurrentDir);
+  end;
 end;
 
 procedure TProjectForm.MenuItemShellTreeOpenDirClick(Sender: TObject);
@@ -570,18 +736,26 @@ begin
   BuildToolCall(['auto-generate-textures']);
 end;
 
-procedure TProjectForm.MenuItemBreakProcessClick(Sender: TObject);
+procedure TProjectForm.MenuItemStopProcessClick(Sender: TObject);
 begin
   if RunningProcess = nil then
-    raise EInternalError.Create('It should not be possible to call this when RunningProcess = nil');
+    raise EInternalError.Create('No process is running now');
 
   OutputList.AddSeparator;
-  OutputList.AddLine('Forcefully killing the process.', okError);
+  OutputList.AddLine('Stopping the process.', okInfo);
+  RunningProcess.TerminateChildrenHarder;
   FreeProcess;
 end;
 
 procedure TProjectForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
 begin
+  if CastleApplicationMode in [appSimulation, appSimulationPaused] then
+  begin
+    InfoBox('Stop the physics simulation to be able to turn off the editor.');
+    CanClose := false;
+    Exit;
+  end;
+
   if ProposeSaveDesign then
   begin
     { Close sprite sheet editor window if visible }
@@ -620,6 +794,8 @@ end;
 
 procedure TProjectForm.ActionSystemInformationExecute(Sender: TObject);
 begin
+  if SystemInformationForm = nil then
+    SystemInformationForm := TSystemInformationForm.Create(Application);
   SystemInformationForm.Show;
 end;
 
@@ -691,6 +867,38 @@ begin
   ActionViewportUpdate(Sender);
 end;
 
+procedure TProjectForm.ActionViewportRenderNextExecute(Sender: TObject);
+begin
+  case InternalForceWireframe of
+    weNormal        : ActionViewportRenderWireframeOnlyExecute(nil);
+    weWireframeOnly : ActionViewportRenderSolidWireframeExecute(nil);
+    weSolidWireframe: ActionViewportRenderNormalExecute(nil);
+    else
+      begin
+        WritelnWarning('Unexpected InternalForceWireframe value');
+        ActionViewportRenderWireframeOnlyExecute(nil);
+      end;
+  end;
+end;
+
+procedure TProjectForm.ActionViewportRenderNormalExecute(Sender: TObject);
+begin
+  InternalForceWireframe := weNormal;
+  ActionViewportRenderNormal.Checked := true;
+end;
+
+procedure TProjectForm.ActionViewportRenderSolidWireframeExecute(Sender: TObject);
+begin
+  InternalForceWireframe := weSolidWireframe;
+  ActionViewportRenderSolidWireframe.Checked := true;
+end;
+
+procedure TProjectForm.ActionViewportRenderWireframeOnlyExecute(Sender: TObject);
+begin
+  InternalForceWireframe := weWireframeOnly;
+  ActionViewportRenderWireframeOnly.Checked := true;
+end;
+
 procedure TProjectForm.ActionViewportAlignCameraToViewExecute(Sender: TObject);
 begin
   if Design <> nil then
@@ -709,6 +917,163 @@ begin
     Design.CurrentViewport.InternalGridAxis := not Design.CurrentViewport.InternalGridAxis;
 end;
 
+procedure TProjectForm.ActionPhysicsShowAllJointsToolsExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.ShowAllJointsTools;
+end;
+
+procedure TProjectForm.ActionPhysicsHideAllJointsToolsExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.HideAllJointsTools;
+end;
+
+procedure TProjectForm.ActionFocusDesignExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.FocusDesign;
+end;
+
+procedure TProjectForm.ActionModeInteractExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.ChangeMode(moInteract);
+end;
+
+procedure TProjectForm.ActionModeRotateExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.ChangeMode(moRotate);
+end;
+
+procedure TProjectForm.ActionModeScaleExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.ChangeMode(moScale);
+end;
+
+procedure TProjectForm.ActionModeSelectExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.ChangeMode(moSelect);
+end;
+
+procedure TProjectForm.ActionModeTranslateExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.ChangeMode(moTranslate);
+end;
+
+procedure TProjectForm.ActionPlayStopExecute(Sender: TObject);
+begin
+  RunningToggle(Sender);
+end;
+
+procedure TProjectForm.ActionPlayStopUpdate(Sender: TObject);
+var
+  NowIsRunning: Boolean;
+begin
+  NowIsRunning := IsRunning;
+  if NowIsRunning then
+    ActionPlayStop.ImageIndex := TImageIndex(iiStop)
+  else
+    ActionPlayStop.ImageIndex := TImageIndex(iiPlay);
+  ActionPlayStop.Checked := NowIsRunning;
+
+  BitBtnPlayStop.ImageIndex := ActionPlayStop.ImageIndex;
+  if NowIsRunning then
+  begin
+    BitBtnPlayStop.Caption := 'Stop';
+    BitBtnPlayStop.Hint := 'Break Compilation or Run (Ctrl + F2)';
+  end else
+  begin
+    BitBtnPlayStop.Caption := 'Compile and Run';
+    BitBtnPlayStop.Hint := 'Compile and Run (F9)';
+  end;
+  //BitBtnPlayStop.Checked := NowIsRunning;
+end;
+
+procedure TProjectForm.ActionRunParameterCapabilitiesDefaultExecute(
+  Sender: TObject);
+begin
+  (Sender as TAction).Checked := true; // GroupIndex will make others unselected
+end;
+
+procedure TProjectForm.ActionRunParameterCapabilitiesForceFixedFunctionExecute(
+  Sender: TObject);
+begin
+  (Sender as TAction).Checked := true; // GroupIndex will make others unselected
+end;
+
+procedure TProjectForm.ActionRunParameterCapabilitiesForceModernExecute(
+  Sender: TObject);
+begin
+  (Sender as TAction).Checked := true; // GroupIndex will make others unselected
+end;
+
+procedure TProjectForm.ActionRunParameterDefaultWindowOrFullscreenExecute(
+  Sender: TObject);
+begin
+  (Sender as TAction).Checked := true; // GroupIndex will make others unselected
+end;
+
+procedure TProjectForm.ActionRunParameterDisableFpsLimitExecute(Sender: TObject
+  );
+begin
+  (Sender as TAction).Checked := not (Sender as TAction).Checked;
+end;
+
+procedure TProjectForm.ActionRunParameterDisableSoundExecute(Sender: TObject);
+begin
+  (Sender as TAction).Checked := not (Sender as TAction).Checked;
+end;
+
+procedure TProjectForm.ActionRunParameterRequestFullScreenExecute(
+  Sender: TObject);
+begin
+  (Sender as TAction).Checked := true; // GroupIndex will make others unselected
+end;
+
+procedure TProjectForm.ActionRunParameterRequestWindowExecute(Sender: TObject);
+begin
+  (Sender as TAction).Checked := true; // GroupIndex will make others unselected
+end;
+
+procedure TProjectForm.ActionShowCollidersExecute(Sender: TObject);
+begin
+  Assert(Design <> nil); // menu item is disabled otherwise
+  Design.ShowColliders := not Design.ShowColliders;
+  ActionShowColliders.Checked := Design.ShowColliders;
+end;
+
+procedure TProjectForm.ActionSimulationPauseUnpauseExecute(Sender: TObject);
+begin
+  Assert(Design <> nil);
+  Design.SimulationPauseUnpause;
+end;
+
+procedure TProjectForm.ActionSimulationPauseUnpauseUpdate(Sender: TObject);
+begin
+  ActionSimulationPauseUnpause.Enabled := (Design <> nil) and
+    (CastleApplicationMode in [appSimulation, appSimulationPaused]);
+  ActionSimulationPauseUnpause.Checked := (Design <> nil) and
+    (CastleApplicationMode = appSimulationPaused);
+end;
+
+procedure TProjectForm.ActionSimulationPlayStopExecute(Sender: TObject);
+begin
+  Assert(Design <> nil);
+  Design.SimulationPlayStop;
+end;
+
+procedure TProjectForm.ActionSimulationPlayStopUpdate(Sender: TObject);
+begin
+  ActionSimulationPlayStop.Enabled := Design <> nil;
+  ActionSimulationPlayStop.Checked := (Design <> nil) and
+    (CastleApplicationMode in [appSimulation, appSimulationPaused]);
+end;
+
 procedure TProjectForm.ActionComponentSaveSelectedExecute(Sender: TObject);
 begin
   Assert(Design <> nil); // menu item is disabled otherwise
@@ -720,6 +1085,29 @@ begin
   { Refresh contents of selected dir, and tree of subdirectories,
     in case user created some files/directories in other applications. }
   RefreshFiles(rfEverything);
+end;
+
+procedure TProjectForm.ApplicationProperties1Deactivate(Sender: TObject);
+begin
+  { On GTK, this happens when we open a dialog box, like open/save.
+    It's important to stop treating keys/mouse as pressed then.
+
+    Testcase:
+    - Make new design,
+    - add 3D viewport,
+    - press right mouse button and W (to move forward),
+    - release mouse,
+    - press Ctrl+O (invokes Open dialog),
+    - release all keys, press "Cancel",
+    -> without this line, TCastleControl would think "W" key is still down.
+
+    Note: TCastleControl.DoExit is not called in this case.
+    Form OnDeactive is also not called (matches docs on
+    https://wiki.lazarus.freepascal.org/Event_order#Form.OnDeactivate ).
+  }
+
+  if Design <> nil then
+    Design.ReleaseAllKeysAndMouse;
 end;
 
 procedure TProjectForm.ActionOpenProjectCodeExecute(Sender: TObject);
@@ -867,7 +1255,7 @@ end;
 procedure TProjectForm.ActionViewportSort2DExecute(Sender: TObject);
 begin
   if Design <> nil then
-    Design.ViewportSort2D;
+    Design.ViewportSort(bs2D);
 end;
 
 procedure TProjectForm.ActionViewportTopExecute(Sender: TObject);
@@ -947,6 +1335,16 @@ begin
   ShowNewUnitForm(utEmpty, false);
 end;
 
+procedure TProjectForm.ActionNewUnitViewExecute(Sender: TObject);
+begin
+  ShowNewUnitForm(utView, false);
+end;
+
+procedure TProjectForm.ActionNewUnitBehaviorExecute(Sender: TObject);
+begin
+  ShowNewUnitForm(utBehavior, false);
+end;
+
 procedure TProjectForm.ActionNewUnitHereClassExecute(Sender: TObject);
 begin
   ShowNewUnitForm(utClass, true);
@@ -957,14 +1355,14 @@ begin
   ShowNewUnitForm(utEmpty, true);
 end;
 
-procedure TProjectForm.ActionNewUnitHereStateExecute(Sender: TObject);
+procedure TProjectForm.ActionNewUnitHereViewExecute(Sender: TObject);
 begin
-  ShowNewUnitForm(utState, true);
+  ShowNewUnitForm(utView, true);
 end;
 
-procedure TProjectForm.ActionNewUnitStateExecute(Sender: TObject);
+procedure TProjectForm.ActionNewUnitHereBehaviorExecute(Sender: TObject);
 begin
-  ShowNewUnitForm(utState, false);
+  ShowNewUnitForm(utBehavior, true);
 end;
 
 procedure TProjectForm.ShowNewUnitForm(const AUnitType: TNewUnitType;
@@ -1038,10 +1436,16 @@ begin
 
   if NewUnitForm.ShowModal = mrOK then
   begin
+    ListOpenExistingViewRefresh;
     CheckNewUnitOnSearchPath;
     ProposeToOpenNewFile;
     RefreshFiles(rfFilesInCurrentDir);
   end;
+end;
+
+function TProjectForm.ShowStatistics: Boolean;
+begin
+  Result := ActionShowStatistics.Checked;
 end;
 
 procedure TProjectForm.ApplicationProperties1Exception(Sender: TObject;
@@ -1059,6 +1463,14 @@ begin
     (don't even show exception class for now),
     instead of the default LCL dialog that proposes to kill the application. }
   ErrorBox(E.Message);
+end;
+
+procedure TProjectForm.FormChangeBounds(Sender: TObject);
+begin
+  { Update inspector data for property editors needed by color pick to show in
+    right position. }
+  if Design <> nil then
+    Design.UpdateEditorDataForPropertyEditors;
 end;
 
 procedure TProjectForm.LoadDockLayout;
@@ -1284,6 +1696,7 @@ begin
   BuildPlatformsMenu;
   BuildPackageFormatsMenu;
   ApplicationProperties.OnWarning.Add(@WarningNotification);
+  ListOpenExistingViewStr := TStringList.Create;
   if Docking then
   begin
     // Create dockable forms
@@ -1373,6 +1786,7 @@ begin
   FreeAndNil(DesignOutputForm);
   FreeAndNil(DesignWarningsForm);
   FreeAndNil(PlatformsInfo);
+  FreeAndNil(ListOpenExistingViewStr);
 end;
 
 procedure TProjectForm.FormHide(Sender: TObject);
@@ -1472,8 +1886,16 @@ begin
   end;
 end;
 
-procedure TProjectForm.ListOutputClick(Sender: TObject);
+procedure TProjectForm.ListOpenExistingViewDblClick(Sender: TObject);
+var
+  DesignFileName, DesignUrl: String;
 begin
+  if ListOpenExistingView.ItemIndex <> -1 then
+  begin
+    DesignFileName := ListOpenExistingViewStr[ListOpenExistingView.ItemIndex];
+    DesignUrl := FilenameToURISafe(DesignFileName);
+    ProposeOpenDesign(DesignUrl);
+  end;
 end;
 
 procedure TProjectForm.ListOutputDblClick(Sender: TObject);
@@ -1546,8 +1968,21 @@ begin
   end;
 end;
 
+procedure TProjectForm.MenuItemCacheCleanClick(Sender: TObject);
+begin
+  BuildToolCall(['cache-clean']);
+end;
+
+procedure TProjectForm.MenuItemCacheClick(Sender: TObject);
+begin
+  BuildToolCall(['cache']);
+end;
+
 procedure TProjectForm.MenuItemDesignNewNonVisualClick(Sender: TObject);
 begin
+  if not IsCreatingNewDesignAvailable then
+    Exit;
+
   if ProposeSaveDesign then
     NewDesign(TCastleComponent, nil);
 end;
@@ -1646,6 +2081,10 @@ end;
 
 procedure TProjectForm.UpdateUndo(Sender: TObject);
 begin
+  { It is important to disable these actions, as e.g. calling
+    TUndoSystem.Undo when IsUndoPossible=false will result in an exception.
+    Testcase: right after loading the design, undo should not be possible,
+    Ctrl+Z should do nothing. }
   if Design <> nil then
   begin
     MenuItemUndo.Enabled := Design.UndoSystem.IsUndoPossible;
@@ -1749,6 +2188,12 @@ procedure TProjectForm.MenuItemDesignCloseClick(Sender: TObject);
 begin
   Assert(Design <> nil); // menu item is disabled otherwise
 
+  if CastleApplicationMode in [appSimulation, appSimulationPaused] then
+  begin
+    InfoBox('Stop the physics simulation to be able to close design.');
+    Exit;
+  end;
+
   if ProposeSaveDesign then
   begin
     UserConfig.SetValue('ProjectForm_Design.PanelRight.Width', Design.PanelRight.Width);
@@ -1783,6 +2228,59 @@ begin
   MenuItemModeDebug.Checked := true;
 end;
 
+procedure TProjectForm.ListOpenExistingViewAddFile(const FileInfo: TFileInfo; var StopSearch: boolean);
+begin
+  ListOpenExistingViewStr.Append(FileInfo.AbsoluteName);
+end;
+
+procedure TProjectForm.ListOpenExistingViewRefresh;
+
+  function ShortDesignName(const S: String): String;
+  begin
+    Result := DeleteFileExt(ExtractFileName(S));
+    Result := PrefixRemove('gameview', Result, true);
+    Result := PrefixRemove('gamestate', Result, true);
+    Result := SuffixRemove('.castle-user-interface', Result, true);
+  end;
+
+var
+  ListItem: TListItem;
+  DesignFileName, ProjectDataUrl: String;
+begin
+  { calculate ListOpenExistingViewStr contents }
+  ListOpenExistingViewStr.Clear;
+  { Search in ProjectDataUrl, not ProjectPathUrl, as all designs should be part of data
+    to be possible to open them at runtime.
+    This also avoids finding stuff in castle-engine-output, which is possible,
+    e.g. after "castle-engine package --target=android" the castle-engine-output contains
+    some temporary data with copies of design files -- and we *do not* want to show them here. }
+  ProjectDataUrl := CombineURI(ProjectPathUrl, 'data/');
+  if URIExists(ProjectDataUrl) <> ueNotExists then
+  begin
+    FindFiles(ProjectDataUrl, 'gameview*.castle-user-interface', false, @ListOpenExistingViewAddFile, [ffRecursive]);
+    // support deprecated names
+    FindFiles(ProjectDataUrl, 'gamestate*.castle-user-interface', false, @ListOpenExistingViewAddFile, [ffRecursive]);
+  end;
+  { without sorting, the order would be ~random (as FindFiles enumarates).
+    Note that we sort including the subdirectory names, which is good,
+    we want files in the same subdirectory to be together. }
+  ListOpenExistingViewStr.Sort;
+
+  { TODO: It seems LCL UI always shows as if the "Last Modified" (column 2)
+    was sorted, and setting ListOpenExistingView.SortColumn from code
+    or LFM doesn't change it. }
+
+  { copy ListOpenExistingViewStr contents -> ListOpenExistingView GUI contents }
+  ListOpenExistingView.Items.Clear;
+  for DesignFileName in ListOpenExistingViewStr do
+  begin
+    ListItem := ListOpenExistingView.Items.Add;
+    ListItem.Caption := ShortDesignName(DesignFileName);
+    ListItem.SubItems.Append(ExtractRelativePath(ProjectPath, DesignFileName));
+    ListItem.SubItems.Append(FileDateTimeStr(DesignFileName));
+  end;
+end;
+
 procedure TProjectForm.DesignExistenceChanged;
 var
   NewPanelRightWidth, NewPanelLeftWidth: Integer;
@@ -1801,6 +2299,22 @@ begin
   ActionComponentDuplicate.Enabled := Design <> nil;
   ActionComponentSaveSelected.Enabled := Design <> nil;
   ActionEditAssociatedUnit.Enabled := Design <> nil;
+  ActionFocusDesign.Enabled := Design <> nil;
+  ActionModeInteract.Enabled := Design <> nil;
+  ActionModeSelect.Enabled := Design <> nil;
+  ActionModeTranslate.Enabled := Design <> nil;
+  ActionModeRotate.Enabled := Design <> nil;
+  ActionModeScale.Enabled := Design <> nil;
+  ActionShowStatistics.Enabled := Design <> nil;
+
+  { Options that toggle InternalForceWireframe could actually work with Design=nil,
+    with current implementation.
+    But their effect would be invisible, so better disable. }
+  ActionViewportRenderNormal.Enabled := Design <> nil;
+  ActionViewportRenderWireframeOnly.Enabled := Design <> nil;
+  ActionViewportRenderSolidWireframe.Enabled := Design <> nil;
+  ActionViewportRenderNext.Enabled := Design <> nil;
+  MenuItemWireframe.Enabled := Design <> nil;
 
   UpdateUndo(nil);
   UpdateRenameItem(nil);
@@ -1820,7 +2334,22 @@ begin
     end;
   end;
 
-  LabelNoDesign.Visible := Design = nil;
+  SetEnabledVisible(PanelNoDesign, Design = nil);
+
+  if Design = nil then
+    ListOpenExistingViewRefresh;
+end;
+
+procedure TProjectForm.ProposeOpenDesign(const DesignUrl: String);
+begin
+  if CastleApplicationMode in [appSimulation, appSimulationPaused] then
+  begin
+    InfoBox('Stop the physics simulation to be able to open design.');
+    Exit;
+  end;
+
+  if ProposeSaveDesign then
+    OpenDesign(DesignUrl);
 end;
 
 procedure TProjectForm.NeedsDesignFrame;
@@ -1834,6 +2363,14 @@ begin
     Design.UndoSystem.OnUpdateUndo := @UpdateUndo;
     Design.OnSelectionChanged := @UpdateRenameItem;
     Design.OnCurrentViewportChanged := @CurrentViewportChanged;
+    Design.OnProposeOpenDesign := @ProposeOpenDesign;
+    Design.OnIsRunning  := @IsRunning;
+    Design.OnShowStatistics  := @ShowStatistics;
+    Design.OnRunningToggle  := @RunningToggle;
+    Design.OnApiReferenceOfCurrent := @MenuItemReferenceOfCurrentClick;
+
+    // Update Design.ActionPlayStop, after OnIsRunning and OnRunningToggle are set
+    Design.ActionPlayStopUpdate(Design.ActionPlayStop);
 
     DesignExistenceChanged;
     if Docking then
@@ -1873,6 +2410,26 @@ begin
     end;
   end else
     UnselectAll;
+end;
+
+function TProjectForm.SaveDuringPhysicsSimulation: Boolean;
+begin
+  Result := true;
+  if CastleApplicationMode in [appSimulation, appSimulationPaused] then
+  begin
+    Result := YesNoBox('The editor is during of physics simulation.'+ NL +
+      'Saving the design will save the current state, not the state before the start of the simulation. Do you want to continue?');
+  end;
+end;
+
+function TProjectForm.IsCreatingNewDesignAvailable: Boolean;
+begin
+  Result := true;
+  if CastleApplicationMode in [appSimulation, appSimulationPaused] then
+  begin
+    InfoBox('Stop the physics simulation to be able to create new design.');
+    Result := false;
+  end;
 end;
 
 procedure TProjectForm.NewDesign(const ComponentClass: TComponentClass;
@@ -1918,12 +2475,18 @@ end;
 
 procedure TProjectForm.MenuItemDesignNewUserInterfaceRectClick(Sender: TObject);
 begin
+  if not IsCreatingNewDesignAvailable then
+    Exit;
+
   if ProposeSaveDesign then
     NewDesign(TCastleUserInterface, nil);
 end;
 
 procedure TProjectForm.MenuItemDesignNewTransformClick(Sender: TObject);
 begin
+  if not IsCreatingNewDesignAvailable then
+    Exit;
+
   if ProposeSaveDesign then
     NewDesign(TCastleTransform, nil);
 end;
@@ -1940,6 +2503,12 @@ end;
 
 procedure TProjectForm.MenuItemOpenDesignClick(Sender: TObject);
 begin
+  if CastleApplicationMode in [appSimulation, appSimulationPaused] then
+  begin
+    InfoBox('Stop the physics simulation to be able to open design.');
+    Exit;
+  end;
+
   if ProposeSaveDesign then
   begin
     if Design <> nil then
@@ -1969,6 +2538,12 @@ end;
 
 procedure TProjectForm.MenuItemSwitchProjectClick(Sender: TObject);
 begin
+  if CastleApplicationMode in [appSimulation, appSimulationPaused] then
+  begin
+    InfoBox('Stop the physics simulation to be able to switch project.');
+    Exit;
+  end;
+
   if ProposeSaveDesign then
   begin
     { Close sprite sheet editor window if visible }
@@ -2003,8 +2578,8 @@ end;
 procedure TProjectForm.FreeProcess;
 begin
   FreeAndNil(RunningProcess);
-  SetEnabledCommandRun(true);
   ProcessUpdateTimer.Enabled := false;
+  IsRunningChanged;
 end;
 
 procedure TProjectForm.ShellListViewSelectItem(Sender: TObject;
@@ -2171,6 +2746,19 @@ begin
     finally FreeAndNil(Macros) end;
     RunCommandNoWait(CreateTemporaryDir, Exe, Parameters.ToArray);
   finally FreeAndNil(Parameters) end;
+end;
+
+function TProjectForm.IsRunning: Boolean;
+begin
+  Result := RunningProcess <> nil;
+end;
+
+procedure TProjectForm.RunningToggle(Sender: TObject);
+begin
+  if RunningProcess = nil then
+    MenuItemCompileRunClick(MenuItemCompileRun)
+  else
+    MenuItemStopProcessClick(MenuItemStopProcess);
 end;
 
 procedure TProjectForm.OpenPascal(const FileName: String; Line: Integer;
@@ -2359,6 +2947,35 @@ procedure TProjectForm.ShellListViewDoubleClick(Sender: TObject);
 var
   SelectedFileName, Ext, SelectedURL: String;
 begin
+  { Forcefully stop dragging.
+
+    This workarounds LCL error with GTK 2 backend:
+    1. if you open another design (xxx.castle-transform
+       or xxx.castle-user-interface) by double-clicking (*not* by menu item "open...")
+    2. and it causes a dialog box "save this design" (you can answer yes or no,
+       doesn't matter)
+    3. .. then the dragging remains "true" (even though you're no longer pressing
+       down the mouse button).
+
+    This causes weird behavior if you then do some mouse-down + move + mouse-up
+    in newly opened design.
+    - e.g. mouse look by right-click on any viewport in newly opened design.
+    - or left click (mouse down and up) anywhere on UI.
+    ... They will all try to drag-and-drop the design you have just opened onto
+    itself.
+
+    TODO: There remains a problem in the above case, even after this fix:
+    First mouse down after such "forceful break of dragging" is not passed to TCastleControl.
+    So you need to click again to actually start e.g. mouse look on a viewport.
+  }
+  if DragManager.IsDragging then
+  begin
+    DragManager.DragStop(false);
+    WritelnLog('Forcefully breaking drag-and-drop on double-click to workaround LCL bug, afterwards IsDragging: %s', [
+      BoolToStr(DragManager.IsDragging, true)
+    ]);
+  end;
+
   if ShellListView1.Selected <> nil then
   begin
     SelectedFileName := ShellListView1.GetPathFromItem(ShellListView1.Selected);
@@ -2399,8 +3016,7 @@ begin
        AnsiSameText(Ext, '.castle-transform') or
        AnsiSameText(Ext, '.castle-component') then
     begin
-      if ProposeSaveDesign then
-        OpenDesign(SelectedURL);
+      ProposeOpenDesign(SelectedURL);
       Exit;
     end;
 
@@ -2470,6 +3086,26 @@ procedure TProjectForm.BuildToolCall(const Commands: array of String;
       Params.Add('--package-format=' + PackageFormatToString(Format));
   end;
 
+  { Add parameters for "castle-engine run".
+    Call it last, because it has to add also "--" that delimits build tool params
+    from application params. }
+  procedure AddRunParameters(const Params: TStrings);
+  begin
+    Params.Add('--');
+    if ActionRunParameterDisableSound.Checked then
+      Params.Add('--no-sound');
+    if ActionRunParameterDisableFpsLimit.Checked then
+      Params.Add('--no-limit-fps');
+    if ActionRunParameterRequestFullScreen.Checked then
+      Params.Add('--fullscreen');
+    if ActionRunParameterRequestWindow.Checked then
+      Params.Add('--window');
+    if ActionRunParameterCapabilitiesForceFixedFunction.Checked then
+      Params.Add('--capabilities=force-fixed-function');
+    if ActionRunParameterCapabilitiesForceModern.Checked then
+      Params.Add('--capabilities=force-modern');
+  end;
+
 var
   BuildToolExe, Command: String;
   QueueItem: TAsynchronousProcessQueue.TQueueItem;
@@ -2484,7 +3120,6 @@ begin
     Exit;
   end;
 
-  SetEnabledCommandRun(false);
   OutputList.Clear;
   PageControlBottom.ActivePage := TabOutput;
   ProcessUpdateTimer.Enabled := true;
@@ -2507,7 +3142,8 @@ begin
         (Command = 'generate-program') or
         (Command = 'editor') or
         (Command = 'editor-rebuild-if-needed') or
-        (Command = 'editor-run')
+        (Command = 'editor-run') or
+        (Command = 'cache')
       ) then
       AddModeParameters(QueueItem.Parameters);
     // add --compiler parameter
@@ -2518,7 +3154,8 @@ begin
     if (Command = 'compile') or
        (Command = 'run') or
        (Command = 'package') or
-       (Command = 'install') then
+       (Command = 'install') or
+       (Command = 'cache') then
       AddPlatformParameters(QueueItem.Parameters, PlatformsInfo[CurrentPlatformInfo]);
     // add --package-format
     if (Command = 'package') or
@@ -2527,6 +3164,9 @@ begin
     // editor always add --fast to package, as its more comfortable for normal development
     if (Command = 'package') then
       QueueItem.Parameters.Add('--fast');
+    // add --target, --os, --cpu parameters
+    if (Command = 'run') then
+      AddRunParameters(QueueItem.Parameters);
     RunningProcess.Queue.Add(QueueItem);
   end;
 
@@ -2535,6 +3175,8 @@ begin
   RunningProcess.OnFinished := @BuildToolCallFinished;
 
   RunningProcess.Start;
+
+  IsRunningChanged;
 end;
 
 procedure TProjectForm.RestartEditor(Sender: TObject);
@@ -2587,6 +3229,9 @@ procedure TProjectForm.MenuItemDesignNewCustomRootClick(Sender: TObject);
 var
   R: TRegisteredComponent;
 begin
+  if not IsCreatingNewDesignAvailable then
+    Exit;
+
   if ProposeSaveDesign then
   begin
     R := TRegisteredComponent(Pointer((Sender as TComponent).Tag));
@@ -2594,19 +3239,32 @@ begin
   end;
 end;
 
-procedure TProjectForm.SetEnabledCommandRun(const AEnabled: Boolean);
+procedure TProjectForm.IsRunningChanged;
+var
+  EnableRun: Boolean;
 begin
-  MenuItemCompile.Enabled := AEnabled;
-  MenuItemCompileRun.Enabled := AEnabled;
-  MenuItemOnlyRun.Enabled := AEnabled;
-  MenuItemClean.Enabled := AEnabled;
-  MenuItemPackage.Enabled := AEnabled;
-  MenuItemPackageSource.Enabled := AEnabled;
-  MenuItemInstall.Enabled := AEnabled;
-  MenuItemAutoGenerateTextures.Enabled := AEnabled;
-  MenuItemAutoGenerateClean.Enabled := AEnabled;
-  MenuItemRestartRebuildEditor.Enabled := AEnabled;
-  MenuItemBreakProcess.Enabled := not AEnabled;
+  EnableRun := not IsRunning;
+
+  MenuItemCompile.Enabled := EnableRun;
+  MenuItemCompileRun.Enabled := EnableRun;
+  MenuItemOnlyRun.Enabled := EnableRun;
+  MenuItemClean.Enabled := EnableRun;
+  MenuItemPackage.Enabled := EnableRun;
+  MenuItemPackageSource.Enabled := EnableRun;
+  MenuItemInstall.Enabled := EnableRun;
+  MenuItemAutoGenerateTextures.Enabled := EnableRun;
+  MenuItemAutoGenerateClean.Enabled := EnableRun;
+  MenuItemRestartRebuildEditor.Enabled := EnableRun;
+  MenuItemCache.Enabled := EnableRun;
+  MenuItemCacheClean.Enabled := EnableRun;
+  ActionRegenerateProject.Enabled := EnableRun;
+
+  MenuItemStopProcess.Enabled := not EnableRun;
+
+  // Looks like we need to call this manually
+  // (to update because of ActionPlayStopExecute or when process starts/stops independently)
+  if Design <> nil then
+    Design.ActionPlayStopUpdate(Design.ActionPlayStop);
 end;
 
 procedure TProjectForm.UpdateFormCaption(Sender: TObject);
@@ -2692,7 +3350,7 @@ begin
 
   // It's too easy to change it visually and forget, so we set it from code
   PageControlBottom.ActivePage := TabFiles;
-  SetEnabledCommandRun(true);
+  IsRunningChanged;
 
   BuildMode := bmDebug;
   MenuItemModeDebug.Checked := true;
@@ -2703,12 +3361,12 @@ begin
   if (Manifest.EditorUnits <> '') and
      (ProjectName <> InternalCustomComponentsForProject) then
   begin
-    if YesNoBox(Format('Project "%s" uses custom components.' + NL + NL +
-          'Rebuild and restart editor with custom components?', [
-          ProjectName
-        ])) then
-      MenuItemRestartRebuildEditorClick(nil);
-      //WritelnWarning('Project uses custom components (declares editor_units in CastleEngineManifest.xml), but this is not a custom editor build.' + NL + 'Use the menu item "Project -> Restart Editor (With Custom Components)" to build and run correct editor.');
+    RestartCustomEditorForm.Initialize(ProjectName, ProjectPath);
+    case RestartCustomEditorForm.ShowModal of
+      mrOK: MenuItemRestartRebuildEditorClick(nil);
+      mrYesToAll: RestartEditor(nil);
+    end;
+    //WritelnWarning('Project uses custom components (declares editor_units in CastleEngineManifest.xml), but this is not a custom editor build.' + NL + 'Use the menu item "Project -> Restart Editor (With Custom Components)" to build and run correct editor.');
   end;
 end;
 

@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -33,13 +33,13 @@
     class function ClassX3DType: string; override;
 
     strict private FFdRadius: TSFFloat;
-    {  }
+    { Internal wrapper for property @link(Radius). This wrapper API may change, we advise to access simpler @link(Radius) instead. }
     public property FdRadius: TSFFloat read FFdRadius;
     {  }
     property Radius: Single read GetRadius write SetRadius;
 
     strict private FFdSlices: TSFInt32;
-    {  }
+    { Internal wrapper for property @link(Slices). This wrapper API may change, we advise to access simpler @link(Slices) instead. }
     public property FdSlices: TSFInt32 read FFdSlices;
     {  }
     property Slices: Integer read GetSlices write SetSlices;

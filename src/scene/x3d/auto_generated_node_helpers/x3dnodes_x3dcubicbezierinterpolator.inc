@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -28,7 +28,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdControlPoints: TMFVec4f;
-    {  }
+    { Internal wrapper for property @link(ControlPoints). This wrapper API may change, we advise to access simpler @link(ControlPoints) instead. }
     public property FdControlPoints: TMFVec4f read FFdControlPoints;
     {  }
     procedure SetControlPoints(const Value: array of TVector4); overload;

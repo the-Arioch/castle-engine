@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -33,13 +33,13 @@
     class function ClassX3DType: string; override;
 
     strict private FFdDescription: TSFString;
-    {  }
+    { Internal wrapper for property @link(Description). This wrapper API may change, we advise to access simpler @link(Description) instead. }
     public property FdDescription: TSFString read FFdDescription;
     {  }
     property Description: String read GetDescription write SetDescription;
 
     strict private FFdPitch: TSFFloat;
-    {  }
+    { Internal wrapper for property @link(Pitch). This wrapper API may change, we advise to access simpler @link(Pitch) instead. }
     public property FdPitch: TSFFloat read FFdPitch;
     {  }
     property Pitch: Single read GetPitch write SetPitch;
@@ -84,7 +84,7 @@ begin
   inherited;
 
   FFdDescription := TSFString.Create(Self, True, 'description', '');
-   FdDescription.ChangeAlways := chVisibleNonGeometry;
+   FdDescription.ChangeAlways := chNone;
   AddField(FFdDescription);
 
   FFdPitch := TSFFloat.Create(Self, True, 'pitch', 1.0);

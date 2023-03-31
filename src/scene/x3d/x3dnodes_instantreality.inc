@@ -1,5 +1,5 @@
 {
-  Copyright 2008-2022 Michalis Kamburelis.
+  Copyright 2008-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -24,7 +24,7 @@
     See https://castle-engine.io/x3d_extensions.php#section_ext_matrix_transform .
     It is compatible with InstantReality,
     see http://instant-reality.com/documentation/nodetype/MatrixTransform/ . }
-  TMatrixTransformNode = class(TAbstractX3DGroupingNode)
+  TMatrixTransformNode = class(TAbstractGroupingNode)
   strict private
     type
       TMatrixTransformNodeTransformFunctionality = class(TTransformFunctionality)
@@ -54,13 +54,12 @@
     function DirectEnumerateActive(Func: TEnumerateChildrenFunction): Pointer; override;
   public
     constructor Create(const AX3DName: string = ''; const ABaseUrl: string = ''); override;
-
     function Proxy(var State: TX3DGraphTraverseState): TAbstractGeometryNode; override;
-
     function TexCoordField: TSFNode; override;
     function AutoGenerate3DTexCoords: boolean; override;
+    function SolidField: TSFBool; override;
 
-    {$I auto_generated_node_helpers/x3dnodes_teapot.inc}
+  {$I auto_generated_node_helpers/x3dnodes_teapot.inc}
   end;
 
   { X3D events logging.
@@ -73,7 +72,7 @@
   public
     constructor Create(const AX3DName: string = ''; const ABaseUrl: string = ''); override;
     destructor Destroy; override;
-    {$I auto_generated_node_helpers/x3dnodes_logger.inc}
+  {$I auto_generated_node_helpers/x3dnodes_logger.inc}
   end;
 
   TConverterNode = class(TAbstractChildNode)
@@ -81,19 +80,8 @@
     procedure EventInReceive(
       const Event: TX3DEvent; const Value: TX3DField; const Time: TX3DTime);
   public
-    procedure CreateNode; override;
-    class function ClassX3DType: string; override;
-
-    strict private FFdEnabled: TSFBool;
-    public property FdEnabled: TSFBool read FFdEnabled;
-
-    { Event in } { }
-    strict private FEventIn: TXFAnyEvent;
-    public property EventIn: TXFAnyEvent read FEventIn;
-
-    { Event out } { }
-    strict private FEventOut: TXFAnyEvent;
-    public property EventOut: TXFAnyEvent read FEventOut;
+    constructor Create(const AX3DName, ABaseUrl: String); override;
+  {$I auto_generated_node_helpers/x3dnodes_converter.inc}
   end;
 
   { Texture with contents created by rendering the scene from a specific
@@ -123,6 +111,8 @@
   TPlaneNode = class(TAbstractGeometryNode)
   public
     function Proxy(var State: TX3DGraphTraverseState): TAbstractGeometryNode; override;
+    function SolidField: TSFBool; override;
+
   {$I auto_generated_node_helpers/x3dnodes_plane.inc}
   end;
 
@@ -143,43 +133,7 @@
       const Event: TX3DEvent; const Value: TX3DField; const Time: TX3DTime);
   public
     constructor Create(const AX3DName: string = ''; const ABaseUrl: string = ''); override;
-    procedure CreateNode; override;
-    class function ClassX3DType: string; override;
-
-    strict private FFdStatus: TSFBool;
-    public property FdStatus: TSFBool read FFdStatus;
-
-    strict private FFdNotStatus: TSFBool;
-    public property FdNotStatus: TSFBool read FFdNotStatus;
-
-    { Event in } { }
-    strict private FEventToggle: TXFAnyEvent;
-    public property EventToggle: TXFAnyEvent read FEventToggle;
-
-    { Event in } { }
-    strict private FEventSet: TXFAnyEvent;
-    public property EventSet: TXFAnyEvent read FEventSet;
-
-    { Event in } { }
-    strict private FEventReset: TXFAnyEvent;
-    public property EventReset: TXFAnyEvent read FEventReset;
-
-    { Event out } { }
-    strict private FEventChanged: TSFBoolEvent;
-    public property EventChanged: TSFBoolEvent read FEventChanged;
-
-    { Event out } { }
-    strict private FEventOn: TSFBoolEvent;
-    public property EventOn: TSFBoolEvent read FEventOn;
-
-    { Event out } { }
-    strict private FEventOff: TSFBoolEvent;
-    public property EventOff: TSFBoolEvent read FEventOff;
-
-    strict private FFdEnabled: TSFBool;
-    public property FdEnabled: TSFBool read FFdEnabled;
-
-    {$I auto_generated_node_helpers/x3dnodes_toggler.inc}
+  {$I auto_generated_node_helpers/x3dnodes_toggler.inc}
   end;
 
   { Advanced material that can be heavily configured using textures
@@ -231,33 +185,7 @@
   TImageBackgroundNode = class(TAbstractBackgroundNode)
   protected
     function DirectEnumerateActive(Func: TEnumerateChildrenFunction): Pointer; override;
-  public
-    procedure CreateNode; override;
-    class function ClassX3DType: string; override;
-
-    strict private FFdColor: TSFColorRGBA;
-    { @seealso Color }
-    public property FdColor: TSFColorRGBA read FFdColor;
-
-    strict private FFdTexture: TSFNode;
-    { @seealso Texture }
-    public property FdTexture: TSFNode read FFdTexture;
-
-    strict private FFdTexCoords: TMFVec2f;
-    { Texture coordinates of the full-screen quad.
-      By default they use the whole texture area:
-
-      @orderedList(
-        @item Vector2(0, 0),
-        @item Vector2(1, 0),
-        @item Vector2(1, 1),
-        @item Vector2(0, 1)
-      )
-
-      It is undefined what happens if there are not exactly 4 items. }
-    public property FdTexCoords: TMFVec2f read FFdTexCoords;
-
-    {$I auto_generated_node_helpers/x3dnodes_imagebackground.inc}
+  {$I auto_generated_node_helpers/x3dnodes_imagebackground.inc}
   end;
 {$endif read_interface}
 
@@ -368,6 +296,11 @@ begin
   except FreeAndNil(Result); raise end;
 end;
 
+function TTeapotNode.SolidField: TSFBool;
+begin
+  Result := FdSolid;
+end;
+
 function TTeapotNode.DirectEnumerateActive(Func: TEnumerateChildrenFunction): Pointer;
 begin
   Result := inherited;
@@ -457,19 +390,12 @@ begin
   end;
 end;
 
-procedure TConverterNode.CreateNode;
+{ TConverterNode ------------------------------------------------------------- }
+
+constructor TConverterNode.Create(const AX3DName, ABaseUrl: String);
 begin
   inherited;
-
-  FFdEnabled := TSFBool.Create(Self, true, 'enabled', true);
-  AddField(FFdEnabled);
-
-  FEventIn := TXFAnyEvent.Create(Self, 'in', true);
-  AddEvent(FEventIn);
   FEventIn.AddNotification({$ifdef FPC}@{$endif} EventInReceive);
-
-  FEventOut := TXFAnyEvent.Create(Self, 'out', true);
-  AddEvent(FEventOut);
 end;
 
 procedure TConverterNode.EventInReceive(
@@ -480,11 +406,6 @@ begin
       convert...) Conversion must be done along the route, when destination
       is known. }
     EventOut.Send(Value, Time);
-end;
-
-class function TConverterNode.ClassX3DType: string;
-begin
-  Result := 'Converter';
 end;
 
 { TRenderedTextureNode.TRenderedTextureGenTex -------------------------------- }
@@ -521,11 +442,23 @@ begin
   Result := Rectangle2DProxy(Self, FdSize.Value, FdSolid.Value);
 end;
 
+function TPlaneNode.SolidField: TSFBool;
+begin
+  Result := FdSolid;
+end;
+
 { TTogglerNode --------------------------------------------------------------- }
 
 constructor TTogglerNode.Create(const AX3DName, ABaseUrl: String);
 begin
   inherited;
+
+  FdStatus.AddNotification({$ifdef FPC}@{$endif} EventStatusReceive);
+  FdNotstatus.AddNotification({$ifdef FPC}@{$endif} EventNotStatusReceive);
+  FEventToggle.AddNotification({$ifdef FPC}@{$endif} EventToggleReceive);
+  EventSet.AddNotification({$ifdef FPC}@{$endif} EventSetReceive);
+  EventReset.AddNotification({$ifdef FPC}@{$endif} EventResetReceive);
+
   FdStatus.OnInputIgnore := {$ifdef FPC}@{$endif} IgnoreWhenDisabled;
   FdNotStatus.OnInputIgnore := {$ifdef FPC}@{$endif} IgnoreWhenDisabled;
 end;
@@ -536,48 +469,6 @@ begin
   { This makes status and notStatus input events ignored,
     and output events not generated when enabled = FALSE. }
   Result := not Enabled;
-end;
-
-procedure TTogglerNode.CreateNode;
-begin
-  inherited;
-
-  FFdStatus := TSFBool.Create(Self, true, 'status', false);
-   FdStatus.AddNotification({$ifdef FPC}@{$endif} EventStatusReceive);
-  AddField(FFdStatus);
-
-  FFdNotStatus := TSFBool.Create(Self, true, 'notStatus', true);
-   FdNotstatus.AddNotification({$ifdef FPC}@{$endif} EventNotStatusReceive);
-  AddField(FFdNotStatus);
-
-  FEventToggle := TXFAnyEvent.Create(Self, 'toggle', true);
-  FEventToggle.AddNotification({$ifdef FPC}@{$endif} EventToggleReceive);
-  AddEvent(FEventToggle);
-
-  FEventSet := TXFAnyEvent.Create(Self, 'set', true);
-   EventSet.AddNotification({$ifdef FPC}@{$endif} EventSetReceive);
-  AddEvent(FEventSet);
-
-  FEventReset := TXFAnyEvent.Create(Self, 'reset', true);
-   EventReset.AddNotification({$ifdef FPC}@{$endif} EventResetReceive);
-  AddEvent(FEventReset);
-
-  FEventChanged := TSFBoolEvent.Create(Self, 'changed', false);
-  AddEvent(FEventChanged);
-
-  FEventOn := TSFBoolEvent.Create(Self, 'on', false);
-  AddEvent(FEventOn);
-
-  FEventOff := TSFBoolEvent.Create(Self, 'off', false);
-  AddEvent(FEventOff);
-
-  FFdEnabled := TSFBool.Create(Self, true, 'enabled', true);
-  AddField(FFdEnabled);
-end;
-
-class function TTogglerNode.ClassX3DType: string;
-begin
-  Result := 'Toggler';
 end;
 
 procedure TTogglerNode.EventStatusReceive(
@@ -717,30 +608,6 @@ begin
 end;
 
 { TImageBackgroundNode ------------------------------------------------------- }
-
-procedure TImageBackgroundNode.CreateNode;
-begin
-  inherited;
-
-  FFdColor := TSFColorRGBA.Create(Self, true, 'color', White);
-  AddField(FFdColor);
-
-  FFdTexture := TSFNode.Create(Self, true, 'texture', [TAbstractTextureNode]);
-  AddField(FFdTexture);
-
-  FFdTexCoords := TMFVec2f.Create(Self, true, 'texCoords', [
-    Vector2(0, 0),
-    Vector2(1, 0),
-    Vector2(1, 1),
-    Vector2(0, 1)
-  ]);
-  AddField(FFdTexCoords);
-end;
-
-class function TImageBackgroundNode.ClassX3DType: string;
-begin
-  Result := 'ImageBackground';
-end;
 
 function TImageBackgroundNode.DirectEnumerateActive(Func: TEnumerateChildrenFunction): Pointer;
 begin

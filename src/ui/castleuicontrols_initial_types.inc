@@ -1,6 +1,6 @@
 {%MainUnit castleuicontrols.pas}
 {
-  Copyright 2010-2021 Michalis Kamburelis.
+  Copyright 2010-2022 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -25,6 +25,8 @@
   TCastleContainer = class;
   TCastleTheme = class;
   TCastleUserInterfaceList = class;
+  TCastleView = class;
+  TCastleViewList = class;
 
   TContainerEvent = procedure (Container: TCastleContainer);
   TContainerObjectEvent = procedure (Container: TCastleContainer) of object;
@@ -110,8 +112,8 @@
     chRender,
 
     { The rectangle (size or position) of the control changed.
-      This concerns all the things that affect
-      @link(TCastleUserInterface.Rect) or our position inside parent (anchors).
+      This concerns all the things that affect size
+      or our position inside parent (anchors).
 
       Note that this is not (necessarily) called when the screen position changed
       just because the parent screen position changed.

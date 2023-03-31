@@ -1,5 +1,5 @@
 {
-  Copyright 2003-2022 Michalis Kamburelis.
+  Copyright 2003-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -94,9 +94,14 @@ implementation
 
 uses SysUtils, Math,
   {$ifdef FPC} CastleGL, {$else} OpenGL, OpenGLext, {$endif}
-  CastleUtils, CastleBoxes;
+  CastleUtils, CastleBoxes, CastleInternalGLUtils;
 
 { Set and enable OpenGL light properties based on X3D light.
+
+  This does something only when ancient OpenGL fixed-function pipeline
+  has to be used.
+  For shaders, we pass light information to shaders in uniform variables,
+  this is handled by CastleRendererInternalShader.
 
   Requires that current OpenGL matrix is modelview.
   Always preserves the matrix value (by using up to one modelview
@@ -207,13 +212,8 @@ begin
   Color4 := Vector4(Color3, 1);
 
   { calculate AmbientColor4 = light color * light ambient intensity }
-  if LightNode.FdAmbientIntensity.Value < 0 then
-    AmbientColor4 := Color4 else
-  begin
-    AmbientColor3 := LightNode.FdColor.Value *
-      LightNode.FdAmbientIntensity.Value;
-    AmbientColor4 := Vector4(AmbientColor3, 1);
-  end;
+  AmbientColor3 := LightNode.FdColor.Value * LightNode.FdAmbientIntensity.Value;
+  AmbientColor4 := Vector4(AmbientColor3, 1);
 
   glLightv(glLightNum, GL_AMBIENT, AmbientColor4);
   glLightv(glLightNum, GL_DIFFUSE, Color4);

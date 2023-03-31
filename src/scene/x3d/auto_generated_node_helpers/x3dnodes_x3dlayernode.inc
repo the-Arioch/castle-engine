@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -33,13 +33,13 @@
     class function ClassX3DType: string; override;
 
     strict private FFdIsPickable: TSFBool;
-    {  }
+    { Internal wrapper for property @link(IsPickable). This wrapper API may change, we advise to access simpler @link(IsPickable) instead. }
     public property FdIsPickable: TSFBool read FFdIsPickable;
     {  }
     property IsPickable: Boolean read GetIsPickable write SetIsPickable;
 
     strict private FFdViewport: TSFNode;
-    {  }
+    { Internal wrapper for property @link(Viewport). This wrapper API may change, we advise to access simpler @link(Viewport) instead. }
     public property FdViewport: TSFNode read FFdViewport;
     {  }
     property Viewport: TAbstractViewportNode read GetViewport write SetViewport;

@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -28,7 +28,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdValue: TMFDouble;
-    {  }
+    { Internal wrapper for property @link(Value). This wrapper API may change, we advise to access simpler @link(Value) instead. }
     public property FdValue: TMFDouble read FFdValue;
     {  }
     procedure SetValue(const Value: array of Double); overload;

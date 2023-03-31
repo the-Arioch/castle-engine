@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -34,6 +34,8 @@
 {$endif not CASTLE_SLIM_NODES}
     function GetColorPerVertex: Boolean;
     procedure SetColorPerVertex(const Value: Boolean);
+    function GetMode: TLineMode;
+    procedure SetMode(const Value: TLineMode);
   public
     procedure CreateNode; override;
     class function ClassX3DType: string; override;
@@ -48,7 +50,7 @@
 
 {$ifndef CASTLE_SLIM_NODES}
     strict private FFdAttrib: TMFNode;
-    {  }
+    { Internal wrapper for property @link(Attrib). This wrapper API may change, we advise to access simpler @link(Attrib) instead. }
     public property FdAttrib: TMFNode read FFdAttrib;
 {$endif not CASTLE_SLIM_NODES}
 {$ifndef CASTLE_SLIM_NODES}
@@ -57,20 +59,20 @@
 {$endif not CASTLE_SLIM_NODES}
 
     strict private FFdColor: TSFNode;
-    {  }
+    { Internal wrapper for property @link(Color). This wrapper API may change, we advise to access simpler @link(Color) instead. }
     public property FdColor: TSFNode read FFdColor;
     {  }
     property Color: TAbstractColorNode read GetColor write SetColor;
 
     strict private FFdCoord: TSFNode;
-    {  }
+    { Internal wrapper for property @link(Coord). This wrapper API may change, we advise to access simpler @link(Coord) instead. }
     public property FdCoord: TSFNode read FFdCoord;
     {  }
     property Coord: TAbstractCoordinateNode read GetCoord write SetCoord;
 
 {$ifndef CASTLE_SLIM_NODES}
     strict private FFdFogCoord: TSFNode;
-    {  }
+    { Internal wrapper for property @link(FogCoord). This wrapper API may change, we advise to access simpler @link(FogCoord) instead. }
     public property FdFogCoord: TSFNode read FFdFogCoord;
 {$endif not CASTLE_SLIM_NODES}
 {$ifndef CASTLE_SLIM_NODES}
@@ -79,26 +81,32 @@
 {$endif not CASTLE_SLIM_NODES}
 
     strict private FFdColorIndex: TMFInt32;
-    {  }
+    { Internal wrapper for property @link(ColorIndex). This wrapper API may change, we advise to access simpler @link(ColorIndex) instead. }
     public property FdColorIndex: TMFInt32 read FFdColorIndex;
     {  }
-    procedure SetColorIndex(const Value: array of LongInt); overload;
+    procedure SetColorIndex(const Value: array of Int32); overload;
     {  }
-    procedure SetColorIndex(const Value: TLongIntList); overload;
+    procedure SetColorIndex(const Value: TInt32List); overload;
 
     strict private FFdColorPerVertex: TSFBool;
-    {  }
+    { Internal wrapper for property @link(ColorPerVertex). This wrapper API may change, we advise to access simpler @link(ColorPerVertex) instead. }
     public property FdColorPerVertex: TSFBool read FFdColorPerVertex;
     {  }
     property ColorPerVertex: Boolean read GetColorPerVertex write SetColorPerVertex;
 
     strict private FFdCoordIndex: TMFInt32;
-    {  }
+    { Internal wrapper for property @link(CoordIndex). This wrapper API may change, we advise to access simpler @link(CoordIndex) instead. }
     public property FdCoordIndex: TMFInt32 read FFdCoordIndex;
     {  }
-    procedure SetCoordIndex(const Value: array of LongInt); overload;
+    procedure SetCoordIndex(const Value: array of Int32); overload;
     {  }
-    procedure SetCoordIndex(const Value: TLongIntList); overload;
+    procedure SetCoordIndex(const Value: TInt32List); overload;
+
+    strict private FFdMode: TSFStringEnum;
+    { Internal wrapper for property @link(Mode). This wrapper API may change, we advise to access simpler @link(Mode) instead. }
+    public property FdMode: TSFStringEnum read FFdMode;
+    { How to interpret the vertexes: as a set of strips, loops, or just pairs of vertexes. See possible @link(TLineMode) values for details. }
+    property Mode: TLineMode read GetMode write SetMode;
 
 {$endif read_interface}
 
@@ -161,12 +169,12 @@ begin
 end;
 
 {$endif not CASTLE_SLIM_NODES}
-procedure TIndexedLineSetNode.SetColorIndex(const Value: array of LongInt);
+procedure TIndexedLineSetNode.SetColorIndex(const Value: array of Int32);
 begin
   FdColorIndex.Send(Value);
 end;
 
-procedure TIndexedLineSetNode.SetColorIndex(const Value: TLongIntList);
+procedure TIndexedLineSetNode.SetColorIndex(const Value: TInt32List);
 begin
   FdColorIndex.Send(Value);
 end;
@@ -181,14 +189,24 @@ begin
   FdColorPerVertex.Send(Value);
 end;
 
-procedure TIndexedLineSetNode.SetCoordIndex(const Value: array of LongInt);
+procedure TIndexedLineSetNode.SetCoordIndex(const Value: array of Int32);
 begin
   FdCoordIndex.Send(Value);
 end;
 
-procedure TIndexedLineSetNode.SetCoordIndex(const Value: TLongIntList);
+procedure TIndexedLineSetNode.SetCoordIndex(const Value: TInt32List);
 begin
   FdCoordIndex.Send(Value);
+end;
+
+function TIndexedLineSetNode.GetMode: TLineMode;
+begin
+  Result := TLineMode(FdMode.EnumValue);
+end;
+
+procedure TIndexedLineSetNode.SetMode(const Value: TLineMode);
+begin
+  FdMode.SendEnumValue(Ord(Value));
 end;
 
 class function TIndexedLineSetNode.ClassX3DType: String;
@@ -237,6 +255,10 @@ begin
   FFdCoordIndex := TMFInt32.Create(Self, False, 'coordIndex', []);
    FdCoordIndex.ChangeAlways := chGeometry;
   AddField(FFdCoordIndex);
+
+  FFdMode := TSFStringEnum.Create(Self, False, 'mode', @LineModeNames, Ord(High(LineModeNames)) + 1, Ord(lmStrip));
+   FdMode.ChangeAlways := chGeometry;
+  AddField(FFdMode);
 end;
 
 {$endif read_implementation}

@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -31,7 +31,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdAutoOffset: TSFBool;
-    {  }
+    { Internal wrapper for property @link(AutoOffset). This wrapper API may change, we advise to access simpler @link(AutoOffset) instead. }
     public property FdAutoOffset: TSFBool read FFdAutoOffset;
     {  }
     property AutoOffset: Boolean read GetAutoOffset write SetAutoOffset;

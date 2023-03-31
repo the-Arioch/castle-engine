@@ -1,3 +1,4 @@
+{%MainUnit ../castlewindow.pas}
 {
   Copyright 2004-2022 Michalis Kamburelis.
 
@@ -15,7 +16,7 @@
 
 function TCastleWindow.RedirectKeyDownToMenuClick: boolean;
 begin
- Result := false;
+  Result := false;
 end;
 
 procedure signal_menu_item_activate(AMenuItemGtk: PGtkMenuItem;

@@ -346,7 +346,18 @@ begin
     if IsFrameListItem(Item) then
       FSelectedFrames.Add(TCastleSpriteSheetFrame(Item.Data));
 
-    Item := FrameListView.GetNextItem(Item, sdBelow, [lisSelected]);
+    { About sdAll:
+
+      In theory, sdBelow should be OK.
+      FrameListView.Selected returns the first selected item,
+      and iterating with sdBelow should return the rest.
+      However LCL WinAPI seems to have a weird bug, with sdBelow we
+      - may not detect all selected
+      - may have infinite loop when only one item is selected.
+
+      The sdAll behaves correctly.
+    }
+    Item := FrameListView.GetNextItem(Item, sdAll, [lisSelected]);
   end;
 end;
 
@@ -839,7 +850,27 @@ begin
 end;
 
 procedure TSpriteSheetEditorForm.FormCreate(Sender: TObject);
+
+  {$ifdef LCLCocoa}
+  procedure FixCocoa;
+  var
+    FirstCol: TListColumn;
+  begin
+    // on Cocoa, image list crashes TListView usage
+    ListViewFrames.LargeImages := nil;
+
+    // on Cocoa, list always behaves like ViewStyle = vsReport and shows nothing when no columns
+    FirstCol := ListViewFrames.Columns.Add;
+    FirstCol.Caption := 'Frame name';
+    FirstCol.Width := 200;
+  end;
+  {$endif}
+
+
 begin
+  {$ifdef LCLCocoa}
+  FixCocoa;
+  {$endif}
   FSelectNewAnimation := true;
   FSpriteSheet := nil;
   FWindowTitle := Caption;

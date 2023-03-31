@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -45,13 +45,13 @@
     public property EventValue_changed: TSFColorEvent read FEventValue_changed;
 
     strict private FFdInitialDestination: TSFColor;
-    {  }
+    { Internal wrapper for property @link(InitialDestination). This wrapper API may change, we advise to access simpler @link(InitialDestination) instead. }
     public property FdInitialDestination: TSFColor read FFdInitialDestination;
     {  }
     property InitialDestination: TCastleColorRGB read GetInitialDestination write SetInitialDestination;
 
     strict private FFdInitialValue: TSFColor;
-    {  }
+    { Internal wrapper for property @link(InitialValue). This wrapper API may change, we advise to access simpler @link(InitialValue) instead. }
     public property FdInitialValue: TSFColor read FFdInitialValue;
     {  }
     property InitialValue: TCastleColorRGB read GetInitialValue write SetInitialValue;

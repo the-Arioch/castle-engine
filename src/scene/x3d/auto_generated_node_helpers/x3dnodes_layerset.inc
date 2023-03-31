@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -31,24 +31,24 @@
     class function ClassX3DType: string; override;
 
     strict private FFdActiveLayer: TSFInt32;
-    {  }
+    { Internal wrapper for property @link(ActiveLayer). This wrapper API may change, we advise to access simpler @link(ActiveLayer) instead. }
     public property FdActiveLayer: TSFInt32 read FFdActiveLayer;
     {  }
     property ActiveLayer: Integer read GetActiveLayer write SetActiveLayer;
 
     strict private FFdLayers: TMFNode;
-    {  }
+    { Internal wrapper for property @link(Layers). This wrapper API may change, we advise to access simpler @link(Layers) instead. }
     public property FdLayers: TMFNode read FFdLayers;
     {  }
     procedure SetLayers(const Value: array of TAbstractLayerNode);
 
     strict private FFdOrder: TMFInt32;
-    {  }
+    { Internal wrapper for property @link(Order). This wrapper API may change, we advise to access simpler @link(Order) instead. }
     public property FdOrder: TMFInt32 read FFdOrder;
     {  }
-    procedure SetOrder(const Value: array of LongInt); overload;
+    procedure SetOrder(const Value: array of Int32); overload;
     {  }
-    procedure SetOrder(const Value: TLongIntList); overload;
+    procedure SetOrder(const Value: TInt32List); overload;
 
 {$endif read_interface}
 
@@ -78,12 +78,12 @@ begin
   FdLayers.Send(A);
 end;
 
-procedure TLayerSetNode.SetOrder(const Value: array of LongInt);
+procedure TLayerSetNode.SetOrder(const Value: array of Int32);
 begin
   FdOrder.Send(Value);
 end;
 
-procedure TLayerSetNode.SetOrder(const Value: TLongIntList);
+procedure TLayerSetNode.SetOrder(const Value: TInt32List);
 begin
   FdOrder.Send(Value);
 end;

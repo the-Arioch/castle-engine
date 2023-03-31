@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -35,7 +35,7 @@
     public property EventSet_boolean: TSFBoolEvent read FEventSet_boolean;
 
     strict private FFdToggle: TSFBool;
-    {  }
+    { Internal wrapper for property @link(Toggle). This wrapper API may change, we advise to access simpler @link(Toggle) instead. }
     public property FdToggle: TSFBool read FFdToggle;
     {  }
     property Toggle: Boolean read GetToggle write SetToggle;

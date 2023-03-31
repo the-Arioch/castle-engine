@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -28,7 +28,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdPoint: TMFVec2f;
-    {  }
+    { Internal wrapper for property @link(Point). This wrapper API may change, we advise to access simpler @link(Point) instead. }
     public property FdPoint: TMFVec2f read FFdPoint;
     {  }
     procedure SetPoint(const Value: array of TVector2); overload;

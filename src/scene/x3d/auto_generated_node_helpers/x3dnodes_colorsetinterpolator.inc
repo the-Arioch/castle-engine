@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -28,7 +28,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdKeyValue: TMFColor;
-    {  }
+    { Internal wrapper for property @link(KeyValue). This wrapper API may change, we advise to access simpler @link(KeyValue) instead. }
     public property FdKeyValue: TMFColor read FFdKeyValue;
     {  }
     procedure SetKeyValue(const Value: array of TCastleColorRGB); overload;

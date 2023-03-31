@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -28,7 +28,7 @@
     class function ClassX3DType: string; override;
 
     strict private FFdFieldOfView: TMFFloat;
-    {  }
+    { Internal wrapper for property @link(FieldOfView). This wrapper API may change, we advise to access simpler @link(FieldOfView) instead. }
     public property FdFieldOfView: TMFFloat read FFdFieldOfView;
     {  }
     procedure SetFieldOfView(const Value: array of Single); overload;
@@ -36,7 +36,7 @@
     procedure SetFieldOfView(const Value: TSingleList); overload;
 
     strict private FFdPosition: TSFVec3f;
-    {  }
+    { Internal wrapper for property @link(Position). This wrapper API may change, we advise to access simpler @link(Position) instead. }
     public property FdPosition: TSFVec3f read FFdPosition;
 
 {$endif read_interface}

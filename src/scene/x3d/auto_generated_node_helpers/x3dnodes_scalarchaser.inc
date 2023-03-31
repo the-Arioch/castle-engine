@@ -1,6 +1,6 @@
 { -*- buffer-read-only: t -*-
 
-  Copyright 2015-2022 Michalis Kamburelis.
+  Copyright 2015-2023 Michalis Kamburelis.
 
   This file is part of "Castle Game Engine".
 
@@ -45,13 +45,13 @@
     public property EventValue_changed: TSFFloatEvent read FEventValue_changed;
 
     strict private FFdInitialDestination: TSFFloat;
-    {  }
+    { Internal wrapper for property @link(InitialDestination). This wrapper API may change, we advise to access simpler @link(InitialDestination) instead. }
     public property FdInitialDestination: TSFFloat read FFdInitialDestination;
     {  }
     property InitialDestination: Single read GetInitialDestination write SetInitialDestination;
 
     strict private FFdInitialValue: TSFFloat;
-    {  }
+    { Internal wrapper for property @link(InitialValue). This wrapper API may change, we advise to access simpler @link(InitialValue) instead. }
     public property FdInitialValue: TSFFloat read FFdInitialValue;
     {  }
     property InitialValue: Single read GetInitialValue write SetInitialValue;
