@@ -9,11 +9,6 @@
         </BuildModes>
       </Target>
       <Target FileName="packages\castle_components.lpk"/>
-      <Target FileName="tools\castle-editor\castle_editor.lpi">
-        <BuildModes>
-          <Mode Name="default"/>
-        </BuildModes>
-      </Target>
       <Target FileName="..\castle-view-image\castle-view-image.lpi">
         <BuildModes>
           <Mode Name="default"/>
@@ -24,6 +19,13 @@
           <Mode Name="default"/>
         </BuildModes>
       </Target>
+      <Target FileName="packages\castle_editor_components.lpk"/>
+      <Target FileName="tools\castle-editor\castle_editor.lpi">
+        <BuildModes>
+          <Mode Name="default"/>
+        </BuildModes>
+      </Target>
+      <Target FileName="packages\castle_indy.lpk"/>
     </Targets>
   </ProjectGroup>
 </CONFIG>
